@@ -10,21 +10,20 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   name      String
-  email     String  @unique
-  phone     String? @unique
+  email     String   @unique
+  phone     String?  @unique
   password  String
-  role      Role    @default(CUSTOMER)
+  role      String   @default("CUSTOMER")
   avatar    String?
-  isActive  Boolean @default(true)
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orders         Order[]
-  reviews        Review[]
-  addresses      Address[]
-  ownedShop      Shop?
-  vendorOrders   VendorOrder[]
-  coupons        Coupon[]
+  orders    Order[]
+  reviews   Review[]
+  addresses Address[]
+  ownedShop Shop?
+  coupons   Coupon[]
 }
 
 model Shop {
@@ -83,8 +82,8 @@ model Product {
 
   categoryId  Int
   shopId      Int?
-  category    Category   @relation(fields: [categoryId], references: [id])
-  shop        Shop?      @relation(fields: [shopId], references: [id])
+  category    Category    @relation(fields: [categoryId], references: [id])
+  shop        Shop?       @relation(fields: [shopId], references: [id])
   orderItems  OrderItem[]
   reviews     Review[]
   coupons     Coupon[]
@@ -107,10 +106,11 @@ model Order {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  userId      Int
-  user        User        @relation(fields: [userId], references: [id])
-  items       OrderItem[]
-  payments    Payment[]
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id])
+  items        OrderItem[]
+  payments     Payment[]
+  vendorOrders VendorOrder[]
 }
 
 model OrderItem {
@@ -126,26 +126,26 @@ model OrderItem {
 }
 
 model Payment {
-  id            Int      @id @default(autoincrement())
-  amount        Float
-  authority     String?
-  referenceId   String?
-  status        String   @default("pending")
-  gateway       String?
-  paidAt        DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  amount      Float
+  authority   String?
+  referenceId String?
+  status      String   @default("pending")
+  gateway     String?
+  paidAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  orderId       Int
-  order         Order @relation(fields: [orderId], references: [id])
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id])
 }
 
 model Review {
-  id      Int     @id @default(autoincrement())
-  rating  Int     @default(5)
-  comment String?
-  isApproved Boolean @default(false)
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  rating     Int      @default(5)
+  comment    String?
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
   userId    Int
   productId Int
@@ -156,58 +156,51 @@ model Review {
 }
 
 model Address {
-  id        Int    @id @default(autoincrement())
-  province  String
-  city      String
-  district  String?
-  street    String
-  alley     String?
-  plaque    String?
+  id         Int     @id @default(autoincrement())
+  province   String
+  city       String
+  district   String?
+  street     String
+  alley      String?
+  plaque     String?
   postalCode String?
-  lat       Float?
-  lng       Float?
-  isDefault Boolean @default(false)
+  lat        Float?
+  lng        Float?
+  isDefault  Boolean @default(false)
 
-  userId    Int
-  user      User   @relation(fields: [userId], references: [id])
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model Coupon {
-  id           Int      @id @default(autoincrement())
-  code         String   @unique
-  type         String   @default("percent")
-  value        Float
-  minOrder     Float    @default(0)
-  maxUses      Int?
-  usedCount    Int      @default(0)
-  expiresAt    DateTime?
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  type      String   @default("percent")
+  value     Float
+  minOrder  Float    @default(0)
+  maxUses   Int?
+  usedCount Int      @default(0)
+  expiresAt DateTime?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 
-  userId       Int?
-  productId    Int?
-  user         User?    @relation(fields: [userId], references: [id])
-  product      Product? @relation(fields: [productId], references: [id])
+  userId    Int?
+  productId Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  product   Product? @relation(fields: [productId], references: [id])
 }
 
 model VendorOrder {
-  id          Int      @id @default(autoincrement())
-  amount      Float
-  commission  Float
-  netAmount   Float
-  status      String   @default("pending")
-  settledAt   DateTime?
-  createdAt   DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  amount    Float
+  commission Float
+  netAmount Float
+  status    String   @default("pending")
+  settledAt DateTime?
+  createdAt DateTime @default(now())
 
-  shopId      Int
-  orderId     Int
-  shop        Shop     @relation(fields: [shopId], references: [id])
-  order       Order    @relation(fields: [orderId], references: [id])
-}
-
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  VENDOR
-  CUSTOMER
+  shopId  Int
+  orderId Int
+  shop    Shop  @relation(fields: [shopId], references: [id])
+  order   Order @relation(fields: [orderId], references: [id])
 }

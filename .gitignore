@@ -3,12 +3,16 @@ dist/
 .next/
 turbo/
 .turbo/
+*.tsbuildinfo
 
-# Laravel
-/vendor/
-/storage/
-/bootstrap/cache/
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.db-journal
 
 # IDE
 .vscode/
@@ -19,3 +23,6 @@ turbo/
 # OS
 .DS_Store
 Thumbs.db
+
+# Next.js
+apps/*/next-env.d.ts

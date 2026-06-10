@@ -5,7 +5,12 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "dev:api": "npm run dev -w @atlas-shop/api",
+    "dev:web": "npm run dev -w @atlas-shop/web",
+    "dev:admin": "npm run dev -w @atlas-shop/admin",
+    "db:migrate": "npm run db:migrate -w @atlas-shop/api",
+    "db:generate": "npm run db:generate -w @atlas-shop/api"
   },
   "devDependencies": {
     "prettier": "^3.2.0",
