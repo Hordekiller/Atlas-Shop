@@ -1,10 +1,140 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Vazir';
+  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/Vazir.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazir';
+  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/Vazir-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazir';
+  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/Vazir-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --dk-primary: #ef4056;
+  --dk-primary-dark: #d8364a;
+  --dk-secondary: #19bfd3;
+  --dk-bg: #f5f5f5;
+  --dk-card: #ffffff;
+  --dk-text: #3f3f3f;
+  --dk-text-light: #81858b;
+  --dk-border: #e0e0e6;
+  --dk-amazing: #e53e3e;
+  --dk-gold: #f9a825;
+}
+
+body {
+  font-family: 'Vazir', 'Tahoma', sans-serif;
+  background: var(--dk-bg);
+  color: var(--dk-text);
+  -webkit-font-smoothing: antialiased;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+}
 
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
+.animate-slide-up { animation: slideUp 0.4s ease-out; }
+
+.dk-container {
+  max-width: 1336px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.dk-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--dk-border);
+  transition: box-shadow 0.2s;
+}
+.dk-card:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.dk-btn-primary {
+  background: var(--dk-primary);
+  color: white;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.dk-btn-primary:hover {
+  background: var(--dk-primary-dark);
+}
+
+.dk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--dk-primary);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.dk-badge-amazing {
+  background: var(--dk-amazing);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.dk-price {
+  font-weight: 700;
+  color: var(--dk-text);
+  letter-spacing: -0.3px;
+}
+
+.dk-price-old {
+  color: var(--dk-text-light);
+  text-decoration: line-through;
+  font-size: 13px;
+}
+
+.dk-rating {
+  color: var(--dk-gold);
+  font-size: 13px;
+}
+
+input, select, textarea, button {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--dk-primary);
+  color: white;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

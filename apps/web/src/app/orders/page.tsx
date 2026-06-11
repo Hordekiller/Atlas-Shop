@@ -8,11 +8,8 @@ import Header from '@/components/Header';
 import { toJalaliHuman } from '@/lib/date';
 
 interface Order {
-  id: number;
-  orderNumber: string;
-  status: string;
-  total: number;
-  items: { id: number; quantity: number }[];
+  id: number; orderNumber: string; status: string;
+  total: number; items: { id: number; quantity: number }[];
   createdAt: string;
 }
 
@@ -34,10 +31,7 @@ export default function OrdersPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('web_token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
-    }
+    if (!token) { router.push('/auth/login'); return; }
     api.get<{ data: Order[]; total: number }>('/orders')
       .then((d) => setOrders(d.data))
       .catch(() => router.push('/auth/login'))
@@ -48,10 +42,8 @@ export default function OrdersPage() {
     return (
       <>
         <Header />
-        <div className="mx-auto max-w-3xl px-4 py-8">
-          <div className="animate-pulse space-y-4">
-            {[1,2,3].map((n) => <div key={n} className="bg-white rounded-xl p-6 h-20" />)}
-          </div>
+        <div className="dk-container py-8">
+          <div className="animate-pulse space-y-4">{[1,2,3].map((n) => <div key={n} className="dk-card p-6 h-20" />)}</div>
         </div>
       </>
     );
@@ -60,21 +52,25 @@ export default function OrdersPage() {
   return (
     <>
       <Header />
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">سفارشات من</h1>
-          <Link href="/profile" className="text-sm text-indigo-600 hover:underline">پروفایل</Link>
+      <div className="dk-container py-6">
+        <nav className="text-xs text-[var(--dk-text-light)] mb-5">
+          <Link href="/" className="hover:text-[var(--dk-primary)]">خانه</Link>
+          <span className="mx-1.5">/</span>
+          <Link href="/profile" className="hover:text-[var(--dk-primary)]">پروفایل</Link>
+          <span className="mx-1.5">/</span>
+          <span className="text-[var(--dk-text)]">سفارشات</span>
+        </nav>
+
+        <div className="flex items-center justify-between mb-5">
+          <h1 className="text-xl font-bold">سفارشات من</h1>
+          <Link href="/profile" className="text-sm" style={{ color: 'var(--dk-primary)' }}>پروفایل</Link>
         </div>
 
         {orders.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-xl shadow-sm border">
-            <p className="text-gray-500 mb-4">هنوز سفارشی ثبت نکرده‌اید.</p>
-            <Link
-              href="/products"
-              className="inline-block rounded-lg bg-indigo-600 px-6 py-3 text-white text-sm hover:bg-indigo-700"
-            >
-              مشاهده محصولات
-            </Link>
+          <div className="text-center py-20 dk-card p-8">
+            <span className="text-5xl block mb-4">📦</span>
+            <p className="text-[var(--dk-text-light)] mb-6">هنوز سفارشی ثبت نکرده‌اید.</p>
+            <Link href="/products" className="dk-btn-primary inline-block text-sm">مشاهده محصولات</Link>
           </div>
         ) : (
           <div className="space-y-3">
@@ -82,21 +78,21 @@ export default function OrdersPage() {
               <Link
                 key={order.id}
                 href={`/orders/${order.id}`}
-                className="block bg-white rounded-xl p-4 shadow-sm border hover:border-indigo-300 transition"
+                className="block dk-card p-4 hover:border-[var(--dk-primary)] transition"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">{order.orderNumber}</p>
-                    <p className="text-xs text-gray-500 mt-1">{toJalaliHuman(order.createdAt)}</p>
+                    <p className="font-medium text-sm">{order.orderNumber}</p>
+                    <p className="text-xs text-[var(--dk-text-light)] mt-1">{toJalaliHuman(order.createdAt)}</p>
+                    <p className="text-xs text-[var(--dk-text-light)] mt-0.5">{order.items.length} قلم کالا</p>
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-indigo-600">{order.total.toLocaleString()} ریال</p>
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${statusColors[order.status] || 'bg-gray-100'}`}>
+                    <p className="dk-price text-sm">{order.total.toLocaleString()} تومان</p>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs ${statusColors[order.status] || 'bg-gray-100'}`}>
                       {statusLabels[order.status] || order.status}
                     </span>
                   </div>
                 </div>
-                <p className="text-xs text-gray-400 mt-2">{order.items.length} قلم کالا</p>
               </Link>
             ))}
           </div>

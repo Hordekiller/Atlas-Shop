@@ -1,88 +1,134 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 import { useCart } from '@/context/CartContext';
-import { useState, useEffect } from 'react';
+
+interface Category { id: number; name: string; slug: string }
 
 export default function Header() {
-  const { totalItems } = useCart();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { totalItems: itemCount } = useCart();
   const [user, setUser] = useState<{ name?: string; email: string } | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [search, setSearch] = useState('');
+  const [showCatMenu, setShowCatMenu] = useState(false);
 
   useEffect(() => {
+    api.get<Category[]>('/categories').then(setCategories).catch(() => {});
     const token = localStorage.getItem('web_token');
     if (token) {
       try {
-        const u = JSON.parse(atob(token.split('.')[1]));
-        setUser(u);
+        const u = JSON.parse(localStorage.getItem('web_user') || '{}');
+        if (u.email) setUser(u);
       } catch {}
     }
   }, []);
 
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-      <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold text-indigo-600">
-          اطلس شاپ
-        </Link>
-
-        <nav className="hidden md:flex items-center gap-6 text-sm">
-          <Link href="/products" className="text-gray-600 hover:text-indigo-600">
-            محصولات
+    <header className="bg-white border-b border-[var(--dk-border)] sticky top-0 z-50">
+      {/* Top bar: Logo + Search + Auth + Cart */}
+      <div className="dk-container">
+        <div className="flex items-center gap-4 h-16">
+          {/* Logo */}
+          <Link href="/" className="shrink-0">
+            <span className="text-2xl font-bold" style={{ color: 'var(--dk-primary)' }}>
+              اطلس
+            </span>
+            <span className="text-lg font-bold text-gray-700">شاپ</span>
           </Link>
-          <Link href="/cart" className="text-gray-600 hover:text-indigo-600 relative">
-            سبد خرید
-            {totalItems > 0 && (
-              <span className="absolute -top-2 -left-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {totalItems}
+
+          {/* Search */}
+          <div className="flex-1 max-w-2xl">
+            <form action={`/products`} method="GET" className="relative">
+              <input
+                name="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="جستجوی محصول..."
+                className="w-full rounded-lg bg-[var(--dk-bg)] px-4 py-2.5 text-sm pr-10 border border-transparent focus:border-[var(--dk-primary)] focus:bg-white outline-none transition"
+              />
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--dk-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </form>
+          </div>
+
+          {/* Auth / Profile */}
+          {user ? (
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--dk-bg)] text-sm whitespace-nowrap"
+            >
+              <svg className="w-5 h-5 text-[var(--dk-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span className="hidden sm:inline text-[var(--dk-text)]">{user.name || user.email}</span>
+            </Link>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--dk-bg)] text-sm whitespace-nowrap"
+            >
+              <svg className="w-5 h-5 text-[var(--dk-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span className="hidden sm:inline text-[var(--dk-text)]">ورود | ثبت‌نام</span>
+            </Link>
+          )}
+
+          {/* Cart */}
+          <Link
+            href="/cart"
+            className="relative flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--dk-bg)] text-sm whitespace-nowrap"
+          >
+            <svg className="w-5 h-5" style={{ color: 'var(--dk-primary)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+            </svg>
+            {itemCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center text-white" style={{ background: 'var(--dk-primary)' }}>
+                {itemCount > 99 ? '99+' : itemCount}
               </span>
             )}
+            <span className="hidden sm:inline text-[var(--dk-text)]">سبد خرید</span>
           </Link>
-          {user ? (
-            <Link href="/profile" className="text-gray-600 hover:text-indigo-600">
-              پروفایل
-            </Link>
-          ) : (
-            <Link href="/auth/login" className="text-gray-600 hover:text-indigo-600">
-              ورود
-            </Link>
-          )}
-        </nav>
-
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden p-2 text-gray-600"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+        </div>
       </div>
 
-      {menuOpen && (
-        <div className="md:hidden border-t bg-white px-4 py-3 space-y-2 text-sm">
-          <Link href="/products" className="block py-2 text-gray-600" onClick={() => setMenuOpen(false)}>
-            محصولات
-          </Link>
-          <Link href="/cart" className="block py-2 text-gray-600" onClick={() => setMenuOpen(false)}>
-            سبد خرید {totalItems > 0 && `(${totalItems})`}
-          </Link>
-          {user ? (
-            <Link href="/profile" className="block py-2 text-gray-600" onClick={() => setMenuOpen(false)}>
-              پروفایل
-            </Link>
-          ) : (
-            <>
-              <Link href="/auth/login" className="block py-2 text-gray-600" onClick={() => setMenuOpen(false)}>
-                ورود
+      {/* Category Nav */}
+      <div className="border-t border-[var(--dk-border)]">
+        <div className="dk-container">
+          <nav className="flex items-center gap-1 h-10 overflow-x-auto scrollbar-hide">
+            <button
+              onClick={() => setShowCatMenu(!showCatMenu)}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-[var(--dk-bg)] whitespace-nowrap"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              دسته‌بندی
+            </button>
+            <span className="w-px h-5 bg-[var(--dk-border)]" />
+            {categories.slice(0, 8).map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/category/${cat.id}`}
+                className="px-3 py-1.5 rounded-lg text-xs text-[var(--dk-text-light)] hover:bg-[var(--dk-bg)] hover:text-[var(--dk-primary)] whitespace-nowrap transition"
+              >
+                {cat.name}
               </Link>
-              <Link href="/auth/register" className="block py-2 text-gray-600" onClick={() => setMenuOpen(false)}>
-                ثبت‌نام
+            ))}
+            {categories.length > 8 && (
+              <Link
+                href="/products"
+                className="px-3 py-1.5 rounded-lg text-xs text-[var(--dk-text-light)] hover:text-[var(--dk-primary)] whitespace-nowrap"
+              >
+                همه محصولات
               </Link>
-            </>
-          )}
+            )}
+          </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 }

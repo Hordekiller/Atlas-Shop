@@ -7,19 +7,9 @@ import { api } from '@/lib/api';
 import Header from '@/components/Header';
 import { toJalaliHuman } from '@/lib/date';
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  phone: string | null;
-  role: string;
-  avatar: string | null;
-  createdAt: string;
-}
-
 export default function ProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ name: '', phone: '' });
   const [saving, setSaving] = useState(false);
@@ -27,19 +17,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const token = localStorage.getItem('web_token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
-    }
-    api.get<User>('/auth/me')
+    if (!token) { router.push('/auth/login'); return; }
+    api.get<any>('/auth/me')
       .then((u) => {
         setUser(u);
         setForm({ name: u.name || '', phone: u.phone || '' });
       })
-      .catch(() => {
-        localStorage.removeItem('web_token');
-        router.push('/auth/login');
-      })
+      .catch(() => { localStorage.removeItem('web_token'); router.push('/auth/login'); })
       .finally(() => setLoading(false));
   }, [router]);
 
@@ -47,19 +31,17 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const updated = await api.put<User>('/auth/profile', form);
+      const updated = await api.put<any>('/auth/profile', form);
       setUser(updated);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch (err: any) {
-      alert(err.message || 'خطا');
-    } finally {
-      setSaving(false);
-    }
+    } catch (err: any) { alert(err.message || 'خطا'); }
+    finally { setSaving(false); }
   };
 
   const handleLogout = () => {
     localStorage.removeItem('web_token');
+    localStorage.removeItem('web_user');
     router.push('/');
   };
 
@@ -67,8 +49,8 @@ export default function ProfilePage() {
     return (
       <>
         <Header />
-        <div className="mx-auto max-w-2xl px-4 py-8">
-          <div className="animate-pulse bg-white rounded-xl p-6 shadow-sm h-64" />
+        <div className="dk-container py-8">
+          <div className="animate-pulse dk-card p-6 h-64" />
         </div>
       </>
     );
@@ -77,64 +59,65 @@ export default function ProfilePage() {
   return (
     <>
       <Header />
-      <div className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">پروفایل</h1>
+      <div className="dk-container py-6">
+        <nav className="text-xs text-[var(--dk-text-light)] mb-5">
+          <Link href="/" className="hover:text-[var(--dk-primary)]">خانه</Link>
+          <span className="mx-1.5">/</span>
+          <span className="text-[var(--dk-text)]">پروفایل</span>
+        </nav>
 
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-          <div className="p-6 border-b bg-gray-50 flex items-center justify-between">
-            <div>
-              <h2 className="font-semibold">{user?.name}</h2>
-              <p className="text-sm text-gray-500">{user?.email}</p>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="dk-card p-6 text-center">
+            <div className="w-20 h-20 rounded-full bg-[var(--dk-bg)] flex items-center justify-center text-2xl font-bold mx-auto mb-3">
+              {(user?.name || 'ک')[0]}
             </div>
-            <div className="text-left">
-              <p className="text-xs text-gray-400">عضویت: {user && toJalaliHuman(user.createdAt)}</p>
-            </div>
+            <h2 className="font-bold">{user?.name || 'کاربر'}</h2>
+            <p className="text-sm text-[var(--dk-text-light)]">{user?.email}</p>
+            <button
+              onClick={handleLogout}
+              className="mt-4 px-6 py-2 rounded-xl border text-sm text-red-500 hover:bg-red-50"
+            >
+              خروج از حساب
+            </button>
           </div>
 
-          <form onSubmit={handleUpdate} className="p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">نام</label>
-              <input
-                type="text"
-                required
-                className="w-full rounded-lg border px-4 py-3 text-sm"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">شماره موبایل</label>
-              <input
-                type="tel"
-                className="w-full rounded-lg border px-4 py-3 text-sm"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              />
-            </div>
-            <div className="flex gap-3">
+          <div className="md:col-span-2 dk-card p-6">
+            <h3 className="font-bold text-sm mb-4">اطلاعات حساب</h3>
+            <form onSubmit={handleUpdate} className="space-y-4 max-w-md">
+              <div>
+                <label className="text-sm font-medium mb-1 block">نام</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full rounded-xl bg-[var(--dk-bg)] px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--dk-primary)]"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">شماره موبایل</label>
+                <input
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="w-full rounded-xl bg-[var(--dk-bg)] px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--dk-primary)]"
+                />
+              </div>
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-indigo-600 px-6 py-2 text-sm text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="dk-btn-primary text-sm disabled:opacity-50"
               >
-                {saving ? 'در حال ذخیره...' : saved ? '✓ ذخیره شد' : 'ذخیره'}
+                {saving ? 'در حال ذخیره...' : saved ? '✓ ذخیره شد' : 'ذخیره تغییرات'}
               </button>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="rounded-lg bg-red-50 px-6 py-2 text-sm text-red-600 hover:bg-red-100"
-              >
-                خروج
-              </button>
-            </div>
-          </form>
-        </div>
+            </form>
 
-        <div className="mt-6 flex gap-3">
-          <Link href="/orders" className="flex-1 rounded-xl bg-white p-4 shadow-sm border text-center hover:border-indigo-300">
-            <p className="text-lg font-bold text-indigo-600">سفارشات من</p>
-            <p className="text-xs text-gray-500 mt-1">مشاهده تاریخچه سفارشات</p>
-          </Link>
+            <div className="mt-8 pt-6 border-t border-[var(--dk-border)]">
+              <h3 className="font-bold text-sm mb-3">سفارشات</h3>
+              <Link href="/orders" className="dk-btn-primary text-sm inline-block">
+                مشاهده سفارشات
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </>

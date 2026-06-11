@@ -4,87 +4,170 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import Header from '@/components/Header';
 import ProductCard from '@/components/ProductCard';
+import Link from 'next/link';
 
 interface Product {
-  id: number;
-  title: string;
-  slug: string;
-  price: number;
-  salePrice: number | null;
-  images: string[];
-  category: { id: number; name: string };
+  id: number; title: string; slug: string; price: number;
+  salePrice: number | null; images: string[];
+  category?: { id: number; name: string };
 }
+interface Category { id: number; name: string; slug: string }
+
+const slides = [
+  { bg: 'from-[#ef4056] to-[#d8364a]', title: 'فروش ویژه بهاره', desc: 'تخفیف تا ۵۰٪ روی هزاران محصول' },
+  { bg: 'from-[#19bfd3] to-[#1599a8]', title: 'محصولات دیجیتال', desc: 'جدیدترین گوشی‌ها و لپ‌تاپ‌ها با بهترین قیمت' },
+  { bg: 'from-[#f9a825] to-[#e8960c]', title: 'مد و پوشاک', desc: 'جدیدترین مدل‌های بهاره و تابستانه' },
+];
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [amazing, setAmazing] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [slideIdx, setSlideIdx] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlideIdx((prev) => (prev + 1) % slides.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     Promise.all([
       api.get<{ data: Product[] }>('/products?sort=newest&take=12'),
-      api.get<{ id: number; name: string }[]>('/categories'),
+      api.get<{ data: Product[] }>('/products?sort=newest&take=8'),
+      api.get<{ id: number; name: string; slug: string }[]>('/categories'),
     ])
-      .then(([prodRes, cats]) => {
+      .then(([prodRes, amaRes, cats]) => {
         setProducts(prodRes.data);
+        setAmazing(amaRes.data);
         setCategories(cats);
       })
       .finally(() => setLoading(false));
   }, []);
 
+  const catIcons = ['📱', '👗', '🖥️', '🏠', '📚', '🎮', '⚽', '🩺'];
+
   return (
     <>
       <Header />
 
-      <section className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
-        <div className="mx-auto max-w-7xl px-4 py-20 text-center">
-          <h2 className="text-4xl font-bold mb-4">به اطلس شاپ خوش آمدید</h2>
-          <p className="text-lg text-indigo-100 mb-8 max-w-2xl mx-auto">
-            فروشگاه اینترنتی چند فروشندگی با تنوع بی‌نظیر محصولات
-          </p>
-          <a
-            href="/products"
-            className="inline-block rounded-lg bg-white px-8 py-3 text-indigo-700 font-medium hover:bg-indigo-50"
-          >
-            مشاهده محصولات
-          </a>
+      {/* Hero Banner */}
+      <section className="dk-container pt-4">
+        <div className="relative rounded-2xl overflow-hidden h-[340px]">
+          {slides.map((slide, i) => (
+            <div
+              key={i}
+              className={`absolute inset-0 bg-gradient-to-br ${slide.bg} flex items-center px-12 transition-opacity duration-500 ${i === slideIdx ? 'opacity-100' : 'opacity-0'}`}
+            >
+              <div className="text-white">
+                <h2 className="text-3xl font-bold mb-3">{slide.title}</h2>
+                <p className="text-white/80 mb-6">{slide.desc}</p>
+                <Link href="/products" className="inline-block bg-white/20 backdrop-blur-sm rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-white/30 transition">
+                  مشاهده محصولات
+                </Link>
+              </div>
+            </div>
+          ))}
+          {/* Dots */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setSlideIdx(i)}
+                className={`w-2.5 h-2.5 rounded-full transition-all ${i === slideIdx ? 'bg-white w-8' : 'bg-white/50'}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
+      {/* Category Icons */}
       {categories.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-8">
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {categories.map((cat) => (
-              <a
-                key={cat.id}
-                href={`/category/${cat.id}`}
-                className="shrink-0 rounded-full bg-white px-5 py-2 text-sm shadow-sm border hover:border-indigo-300 hover:text-indigo-600"
-              >
-                {cat.name}
-              </a>
-            ))}
+        <section className="dk-container py-6">
+          <div className="dk-card p-4">
+            <div className="flex gap-6 overflow-x-auto scrollbar-hide justify-between">
+              {categories.map((cat, i) => (
+                <Link key={cat.id} href={`/category/${cat.id}`} className="flex flex-col items-center gap-2 shrink-0 group">
+                  <div className="w-14 h-14 rounded-full bg-[var(--dk-bg)] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                    {catIcons[i % catIcons.length]}
+                  </div>
+                  <span className="text-[11px] text-[var(--dk-text-light)] group-hover:text-[var(--dk-primary)] whitespace-nowrap">
+                    {cat.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
-      <section className="mx-auto max-w-7xl px-4 pb-16">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold">جدیدترین محصولات</h3>
-          <a href="/products" className="text-sm text-indigo-600 hover:underline">مشاهده همه</a>
+      {/* Amazing Offers */}
+      {amazing.length > 0 && (
+        <section className="dk-container pb-6">
+          <div className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)' }}>
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">⚡</span>
+                  <h3 className="text-lg font-bold text-white">شگفت‌انگیز</h3>
+                </div>
+                <Link href="/products" className="text-xs text-white/70 hover:text-white">
+                  مشاهده همه
+                </Link>
+              </div>
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+                {amazing.map((p) => (
+                  <Link key={p.id} href={`/products/${p.slug}`} className="shrink-0 w-44 bg-white/10 backdrop-blur-sm rounded-xl p-3 hover:bg-white/20 transition group">
+                    <div className="aspect-square rounded-lg overflow-hidden bg-white/20 mb-2">
+                      <img
+                        src={p.images?.[0] ? `http://localhost:8000${p.images[0]}` : 'https://placehold.co/200x200/e2e8f0/94a3b8?text=No+Image'}
+                        alt={p.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                    <h4 className="text-xs text-white/90 line-clamp-2 min-h-[2rem]">{p.title}</h4>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-sm font-bold text-white">
+                        {(p.salePrice || p.price).toLocaleString()}
+                      </span>
+                      {p.salePrice && p.salePrice < p.price && (
+                        <span className="bg-white text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                          %{Math.round(((p.price - p.salePrice) / p.price) * 100)}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Products Grid */}
+      <section className="dk-container pb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-[var(--dk-text)]">جدیدترین محصولات</h3>
+          <Link href="/products" className="text-sm" style={{ color: 'var(--dk-primary)' }}>
+            مشاهده همه
+          </Link>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1,2,3,4].map((n) => (
-              <div key={n} className="rounded-xl bg-white p-4 shadow-sm animate-pulse">
-                <div className="aspect-square rounded-lg bg-gray-200 mb-3" />
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {[1,2,3,4,5,6].map((n) => (
+              <div key={n} className="dk-card p-3 animate-pulse">
+                <div className="aspect-square rounded-lg bg-[var(--dk-bg)] mb-3" />
+                <div className="h-3 bg-[var(--dk-bg)] rounded w-3/4 mb-2" />
+                <div className="h-3 bg-[var(--dk-bg)] rounded w-1/2" />
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -92,12 +175,54 @@ export default function HomePage() {
         )}
 
         {!loading && products.length === 0 && (
-          <p className="text-center text-gray-500 py-12">هیچ محصولی یافت نشد.</p>
+          <p className="text-center text-[var(--dk-text-light)] py-12">هیچ محصولی یافت نشد.</p>
         )}
       </section>
 
-      <footer className="bg-white border-t py-8 text-center text-sm text-gray-500">
-        <p>تمام حقوق مادی و معنوی این فروشگاه متعلق به اطلس شاپ می‌باشد.</p>
+      {/* Footer */}
+      <footer className="bg-white border-t border-[var(--dk-border)] py-8 mt-4">
+        <div className="dk-container">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h4 className="font-bold text-sm mb-3">اطلس شاپ</h4>
+              <ul className="space-y-2 text-xs text-[var(--dk-text-light)]">
+                <li><a href="#" className="hover:text-[var(--dk-primary)]">درباره ما</a></li>
+                <li><a href="#" className="hover:text-[var(--dk-primary)]">تماس با ما</a></li>
+                <li><a href="#" className="hover:text-[var(--dk-primary)]">فرصت‌های شغلی</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-sm mb-3">خدمات مشتریان</h4>
+              <ul className="space-y-2 text-xs text-[var(--dk-text-light)]">
+                <li><a href="#" className="hover:text-[var(--dk-primary)]">راهنمای خرید</a></li>
+                <li><a href="#" className="hover:text-[var(--dk-primary)]">شرایط بازگشت</a></li>
+                <li><a href="#" className="hover:text-[var(--dk-primary)]">پرسش‌های متداول</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-sm mb-3">راهنمایی</h4>
+              <ul className="space-y-2 text-xs text-[var(--dk-text-light)]">
+                <li><a href="#" className="hover:text-[var(--dk-primary)]">نحوه ثبت سفارش</a></li>
+                <li><a href="#" className="hover:text-[var(--dk-primary)]">روش‌های پرداخت</a></li>
+                <li><a href="#" className="hover:text-[var(--dk-primary)]">روش‌های ارسال</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-sm mb-3">با ما همراه شوید</h4>
+              <div className="flex gap-3">
+                {['📱', '💬', '📺', '🐦'].map((icon, i) => (
+                  <a key={i} href="#" className="w-10 h-10 rounded-full bg-[var(--dk-bg)] flex items-center justify-center text-lg hover:bg-[var(--dk-primary)] hover:text-white transition">
+                    {icon}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-[var(--dk-border)] pt-6 text-center text-xs text-[var(--dk-text-light)]">
+            <p>استفاده از مطالب فروشگاه اینترنتی اطلس شاپ فقط برای مقاصد غیرتجاری و با ذکر منبع بلامانع است.</p>
+            <p className="mt-2">کلیه حقوق این سایت متعلق به اطلس شاپ می‌باشد.</p>
+          </div>
+        </div>
       </footer>
     </>
   );

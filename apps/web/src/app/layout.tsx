@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fa" dir="rtl">
-      <body className="bg-gray-50 text-gray-800">
+      <body style={{ background: 'var(--dk-bg)', color: 'var(--dk-text)' }}>
         <CartProvider>{children}</CartProvider>
       </body>
     </html>

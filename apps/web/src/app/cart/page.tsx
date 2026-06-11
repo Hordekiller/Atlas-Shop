@@ -10,85 +10,114 @@ export default function CartPage() {
   return (
     <>
       <Header />
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">سبد خرید</h1>
+      <div className="dk-container py-6">
+        {/* Breadcrumb */}
+        <nav className="text-xs text-[var(--dk-text-light)] mb-5">
+          <Link href="/" className="hover:text-[var(--dk-primary)]">خانه</Link>
+          <span className="mx-1.5">/</span>
+          <span className="text-[var(--dk-text)]">سبد خرید</span>
+        </nav>
+
+        <h1 className="text-xl font-bold mb-6">سبد خرید</h1>
 
         {items.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-gray-500 mb-4">سبد خرید شما خالی است.</p>
+          <div className="text-center py-20">
+            <span className="text-6xl mb-4 block">🛒</span>
+            <p className="text-[var(--dk-text-light)] mb-6">سبد خرید شما خالی است!</p>
             <Link
               href="/products"
-              className="inline-block rounded-lg bg-indigo-600 px-6 py-3 text-white text-sm hover:bg-indigo-700"
+              className="dk-btn-primary inline-block"
             >
               مشاهده محصولات
             </Link>
           </div>
         ) : (
-          <>
-            <div className="space-y-3">
-              {items.map((item) => (
-                <div key={item.productId} className="flex items-center gap-4 bg-white rounded-xl p-4 shadow-sm border">
-                  <div className="w-20 h-20 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
-                    {item.image ? (
-                      <img src={`http://localhost:8000${item.image}`} alt={item.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">No img</div>
-                    )}
-                  </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Items */}
+            <div className="md:col-span-2 space-y-3">
+              {items.map((item) => {
+                const itemTotal = item.price * item.quantity;
+                return (
+                  <div key={item.productId} className="dk-card p-4 flex items-center gap-4">
+                    <div className="w-24 h-24 rounded-xl bg-[var(--dk-bg)] shrink-0 overflow-hidden">
+                      {item.image ? (
+                        <img src={`http://localhost:8000${item.image}`} alt={item.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[var(--dk-text-light)] text-xs">No img</div>
+                      )}
+                    </div>
 
-                  <div className="flex-1 min-w-0">
-                    <Link href={`/products/${item.productId}`} className="text-sm font-medium hover:text-indigo-600 line-clamp-1">
-                      {item.title}
-                    </Link>
-                    <p className="text-sm text-gray-500 mt-1">{item.price.toLocaleString()} ریال</p>
-                  </div>
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/products/${item.productId}`} className="text-sm font-medium line-clamp-1 hover:text-[var(--dk-primary)]">
+                        {item.title}
+                      </Link>
+                      <p className="text-xs text-[var(--dk-text-light)] mt-1">{item.price.toLocaleString()} تومان</p>
+                    </div>
 
-                  <div className="flex items-center border rounded-lg">
+                    {/* Quantity */}
+                    <div className="flex items-center rounded-xl bg-[var(--dk-bg)]">
+                      <button
+                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                        className="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-sm hover:shadow-sm"
+                      >
+                        −
+                      </button>
+                      <span className="w-9 text-center text-sm font-medium">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                        className="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-sm hover:shadow-sm"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* Total */}
+                    <div className="text-left min-w-[90px]">
+                      <p className="text-sm font-bold">{itemTotal.toLocaleString()}</p>
+                      <p className="text-[10px] text-[var(--dk-text-light)]">تومان</p>
+                    </div>
+
+                    {/* Remove */}
                     <button
-                      onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                      className="px-3 py-1 text-gray-600 hover:bg-gray-50 text-sm"
+                      onClick={() => removeItem(item.productId)}
+                      className="p-2 text-[var(--dk-text-light)] hover:text-red-500 transition"
                     >
-                      -
-                    </button>
-                    <span className="px-3 py-1 border-x text-sm">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                      className="px-3 py-1 text-gray-600 hover:bg-gray-50 text-sm"
-                    >
-                      +
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
                     </button>
                   </div>
+                );
+              })}
+            </div>
 
-                  <div className="text-left min-w-[100px]">
-                    <p className="text-sm font-medium">{(item.price * item.quantity).toLocaleString()}</p>
-                    <p className="text-xs text-gray-400">ریال</p>
-                  </div>
-
-                  <button
-                    onClick={() => removeItem(item.productId)}
-                    className="text-red-400 hover:text-red-600 p-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+            {/* Summary */}
+            <div>
+              <div className="dk-card p-5 space-y-4 sticky top-24">
+                <h3 className="font-bold text-sm">خلاصه سبد خرید</h3>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[var(--dk-text-light)]">تعداد کالا</span>
+                  <span className="font-medium">{items.reduce((sum, i) => sum + i.quantity, 0)}</span>
                 </div>
-              ))}
-            </div>
-
-            <div className="mt-6 bg-white rounded-xl p-6 shadow-sm border">
-              <div className="flex items-center justify-between mb-4">
-                <span className="font-semibold">مجموع</span>
-                <span className="text-xl font-bold text-indigo-600">{subtotal.toLocaleString()} ریال</span>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[var(--dk-text-light)]">مبلغ کل</span>
+                  <span className="font-bold text-lg">{subtotal.toLocaleString()}</span>
+                </div>
+                <Link
+                  href="/checkout"
+                  className="block w-full text-center dk-btn-primary text-sm"
+                >
+                  ادامه فرایند خرید
+                </Link>
+                <Link
+                  href="/products"
+                  className="block w-full text-center rounded-xl border py-3 text-sm text-[var(--dk-text-light)] hover:bg-[var(--dk-bg)]"
+                >
+                  ادامه خرید
+                </Link>
               </div>
-              <Link
-                href="/checkout"
-                className="block w-full rounded-lg bg-indigo-600 py-3 text-center text-white font-medium hover:bg-indigo-700"
-              >
-                ادامه فرایند خرید
-              </Link>
             </div>
-          </>
+          </div>
         )}
       </div>
     </>

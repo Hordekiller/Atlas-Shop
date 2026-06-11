@@ -8,29 +8,16 @@ import Header from '@/components/Header';
 import { toJalaliHuman } from '@/lib/date';
 
 interface OrderItem {
-  id: number;
-  productId: number;
-  title: string;
-  quantity: number;
-  price: number;
-  image: string | null;
+  id: number; productId: number; title: string; quantity: number;
+  price: number; image: string | null;
 }
 
 interface Order {
-  id: number;
-  orderNumber: string;
-  status: string;
-  paymentStatus: string;
-  subtotal: number;
-  shippingCost: number;
-  discount: number;
-  total: number;
-  shippingMethod: string | null;
-  shippingAddress: string | null;
-  notes: string | null;
-  items: OrderItem[];
-  createdAt: string;
-  paidAt: string | null;
+  id: number; orderNumber: string; status: string; paymentStatus: string;
+  subtotal: number; shippingCost: number; discount: number; total: number;
+  shippingMethod: string | null; shippingAddress: string | null;
+  notes: string | null; items: OrderItem[];
+  createdAt: string; paidAt: string | null;
 }
 
 const statusLabels: Record<string, string> = {
@@ -57,10 +44,7 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('web_token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
-    }
+    if (!token) { router.push('/auth/login'); return; }
     api.get<Order>(`/orders/${id}`)
       .then(setOrder)
       .catch(() => router.push('/orders'))
@@ -71,9 +55,7 @@ export default function OrderDetailPage() {
     return (
       <>
         <Header />
-        <div className="mx-auto max-w-3xl px-4 py-8">
-          <div className="animate-pulse bg-white rounded-xl p-6 h-64" />
-        </div>
+        <div className="dk-container py-8"><div className="animate-pulse dk-card p-6 h-64" /></div>
       </>
     );
   }
@@ -82,7 +64,7 @@ export default function OrderDetailPage() {
     return (
       <>
         <Header />
-        <div className="mx-auto max-w-3xl px-4 py-12 text-center text-gray-500">سفارش یافت نشد.</div>
+        <div className="dk-container py-12 text-center text-[var(--dk-text-light)]">سفارش یافت نشد.</div>
       </>
     );
   }
@@ -90,74 +72,71 @@ export default function OrderDetailPage() {
   return (
     <>
       <Header />
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <nav className="text-sm text-gray-500 mb-6">
-          <Link href="/orders" className="hover:text-indigo-600">سفارشات من</Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-800">{order.orderNumber}</span>
+      <div className="dk-container py-6">
+        <nav className="text-xs text-[var(--dk-text-light)] mb-5">
+          <Link href="/" className="hover:text-[var(--dk-primary)]">خانه</Link>
+          <span className="mx-1.5">/</span>
+          <Link href="/orders" className="hover:text-[var(--dk-primary)]">سفارشات</Link>
+          <span className="mx-1.5">/</span>
+          <span className="text-[var(--dk-text)]">{order.orderNumber}</span>
         </nav>
 
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-          <div className="p-6 border-b bg-gray-50 flex items-center justify-between">
+        <div className="dk-card overflow-hidden">
+          <div className="p-5 border-b border-[var(--dk-border)] bg-[var(--dk-bg)] flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-bold">{order.orderNumber}</h1>
-              <p className="text-sm text-gray-500 mt-1">{toJalaliHuman(order.createdAt)}</p>
+              <h1 className="font-bold">{order.orderNumber}</h1>
+              <p className="text-xs text-[var(--dk-text-light)] mt-1">{toJalaliHuman(order.createdAt)}</p>
             </div>
-            <div className="text-left">
-              <span className={`rounded-full px-3 py-1 text-sm ${statusColors[order.status] || 'bg-gray-100'}`}>
-                {statusLabels[order.status] || order.status}
-              </span>
-            </div>
+            <span className={`rounded-full px-3 py-1 text-xs ${statusColors[order.status] || 'bg-gray-100'}`}>
+              {statusLabels[order.status] || order.status}
+            </span>
           </div>
 
-          <div className="p-6 space-y-4">
-            <h3 className="font-semibold">اقلام سفارش</h3>
+          <div className="p-5 space-y-3">
+            <h3 className="font-bold text-sm">اقلام سفارش</h3>
             {order.items.map((item) => (
-              <div key={item.id} className="flex items-center gap-4 py-2 border-b last:border-0">
+              <div key={item.id} className="flex items-center gap-4 py-2 border-b border-[var(--dk-border)] last:border-0">
                 <div className="flex-1">
                   <p className="text-sm font-medium">{item.title}</p>
-                  <p className="text-xs text-gray-500">تعداد: {item.quantity}</p>
+                  <p className="text-xs text-[var(--dk-text-light)]">تعداد: {item.quantity}</p>
                 </div>
-                <p className="text-sm font-medium">{(item.price * item.quantity).toLocaleString()} ریال</p>
+                <p className="text-sm font-bold">{(item.price * item.quantity).toLocaleString()} تومان</p>
               </div>
             ))}
           </div>
 
-          <div className="px-6 pb-6 space-y-2 text-sm border-t pt-4">
+          <div className="px-5 pb-5 space-y-2 text-sm border-t border-[var(--dk-border)] pt-4">
             <div className="flex justify-between">
-              <span className="text-gray-500">زیرمجموع</span>
-              <span>{order.subtotal.toLocaleString()} ریال</span>
+              <span className="text-[var(--dk-text-light)]">زیرمجموع</span>
+              <span>{order.subtotal.toLocaleString()} تومان</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">حمل و نقل</span>
-              <span>{order.shippingCost === 0 ? 'رایگان' : `${order.shippingCost.toLocaleString()} ریال`}</span>
+              <span className="text-[var(--dk-text-light)]">حمل و نقل</span>
+              <span>{order.shippingCost === 0 ? 'رایگان' : `${order.shippingCost.toLocaleString()} تومان`}</span>
             </div>
             {order.discount > 0 && (
               <div className="flex justify-between text-green-600">
                 <span>تخفیف</span>
-                <span>-{order.discount.toLocaleString()} ریال</span>
+                <span>−{order.discount.toLocaleString()} تومان</span>
               </div>
             )}
-            <div className="flex justify-between font-bold text-lg border-t pt-2">
+            <div className="flex justify-between font-bold text-lg border-t border-[var(--dk-border)] pt-2">
               <span>مجموع</span>
-              <span className="text-indigo-600">{order.total.toLocaleString()} ریال</span>
+              <span style={{ color: 'var(--dk-primary)' }}>{order.total.toLocaleString()} تومان</span>
             </div>
           </div>
 
-          {(order.shippingMethod || order.shippingAddress || order.notes) && (
-            <div className="px-6 pb-6 space-y-2 text-sm border-t pt-4">
-              {order.shippingMethod && (
-                <p><span className="text-gray-500">روش ارسال:</span> {shippingLabels[order.shippingMethod] || order.shippingMethod}</p>
-              )}
-              {order.shippingAddress && <p><span className="text-gray-500">آدرس:</span> {order.shippingAddress}</p>}
-              {order.notes && <p><span className="text-gray-500">توضیحات:</span> {order.notes}</p>}
+          {(order.shippingMethod || order.notes) && (
+            <div className="px-5 pb-5 space-y-1 text-xs text-[var(--dk-text-light)] border-t border-[var(--dk-border)] pt-4">
+              {order.shippingMethod && <p>روش ارسال: {shippingLabels[order.shippingMethod] || order.shippingMethod}</p>}
+              {order.notes && <p>توضیحات: {order.notes}</p>}
             </div>
           )}
         </div>
 
         <div className="mt-4 text-center">
-          <Link href="/orders" className="text-sm text-indigo-600 hover:underline">
-            بازگشت به لیست سفارشات
+          <Link href="/orders" className="text-sm" style={{ color: 'var(--dk-primary)' }}>
+            ← بازگشت به لیست سفارشات
           </Link>
         </div>
       </div>
