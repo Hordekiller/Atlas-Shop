@@ -15,6 +15,14 @@ import { AdminModule } from './modules/admin/admin.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { SlidesModule } from './modules/slides/slides.module';
+import { VariantsModule } from './modules/variants/variants.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
+import { AddressesModule } from './modules/addresses/addresses.module';
+import { CartModule } from './modules/cart/cart.module';
+import { WalletModule } from './modules/wallet/wallet.module';
+import { PagesModule } from './modules/pages/pages.module';
+import { BrandsModule } from './modules/brands/brands.module';
 
 @Module({
   imports: [
@@ -34,6 +42,14 @@ import { SlidesModule } from './modules/slides/slides.module';
     UploadModule,
     SettingsModule,
     SlidesModule,
+    VariantsModule,
+    InventoryModule,
+    WishlistModule,
+    AddressesModule,
+    CartModule,
+    WalletModule,
+    PagesModule,
+    BrandsModule,
   ],
 })
 export class AppModule {}
