@@ -178,7 +178,7 @@ export default function SettingsPage() {
         ].map((t) => (
           <button key={t.id} type="button" onClick={() => setTab(t.id as any)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
-              tab === t.id ? 'bg-[var(--dk-primary)] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
+              tab === t.id ? 'bg-rose-500 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
             }`}>
             {t.label}
           </button>
@@ -245,7 +245,7 @@ export default function SettingsPage() {
               </div>
             </div>
             <button type="button" onClick={openNewSlide}
-              className="rounded-lg bg-[var(--dk-primary)] text-white px-5 py-2.5 text-sm font-medium hover:brightness-110 transition flex items-center gap-1.5 shadow-sm">
+              className="rounded-lg bg-rose-500 text-white px-5 py-2.5 text-sm font-medium hover:brightness-110 transition flex items-center gap-1.5 shadow-sm">
               <span className="text-lg leading-none">+</span>
               اسلاید جدید
             </button>
@@ -494,7 +494,7 @@ export default function SettingsPage() {
               </div>
             </div>
             <button type="button" onClick={addSection}
-              className="rounded-lg bg-[var(--dk-primary)] text-white px-5 py-2.5 text-sm font-medium hover:brightness-110 transition flex items-center gap-1.5 shadow-sm">
+              className="rounded-lg bg-rose-500 text-white px-5 py-2.5 text-sm font-medium hover:brightness-110 transition flex items-center gap-1.5 shadow-sm">
               <span className="text-lg leading-none">+</span>
               سکشن جدید
             </button>
