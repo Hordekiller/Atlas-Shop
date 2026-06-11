@@ -2,48 +2,53 @@
 
 import { useEffect, useState, FormEvent } from 'react';
 import { api } from '@/lib/api';
+import { useToast } from '@/context/ToastContext';
 
 interface Slide {
-  bg: string;
-  title: string;
-  desc: string;
-}
-
-interface Section {
-  type: string;
-  title: string;
-  sort: string;
-  count: number;
-  categoryId?: number;
+  id?: number; title: string; description: string;
+  bgColor: string; image: string; link: string;
+  sortOrder: number; isActive: boolean;
 }
 
 interface Category { id: number; name: string }
+interface Section { type: string; title: string; sort: string; count: number; categoryId?: number }
+
+const gradients = [
+  'from-[#ef4056] to-[#d8364a]', 'from-[#19bfd3] to-[#1599a8]',
+  'from-[#f9a825] to-[#e8960c]', 'from-[#6b21a8] to-[#581c87]',
+  'from-[#059669] to-[#047857]', 'from-[#2563eb] to-[#1d4ed8]',
+  'from-[#dc2626] to-[#b91c1c]', 'from-[#0891b2] to-[#0e7490]',
+];
 
 export default function SettingsPage() {
+  const { addToast } = useToast();
+  const [tab, setTab] = useState<'general' | 'slides' | 'sections'>('general');
   const [categories, setCategories] = useState<Category[]>([]);
-  const [form, setForm] = useState({
-    site_name: 'اطلس شاپ',
-    site_description: '',
-    support_email: '',
-    support_phone: '',
-    default_shipping: 'post_pishtaz',
-    currency: 'تومان',
-  });
-  const [slides, setSlides] = useState<Slide[]>([
-    { bg: 'from-[#ef4056] to-[#d8364a]', title: '', desc: '' },
-  ]);
-  const [sections, setSections] = useState<Section[]>([
-    { type: 'products', title: '', sort: 'newest', count: 12 },
-  ]);
-  const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // General settings
+  const [form, setForm] = useState({
+    site_name: 'اطلس شاپ', site_description: '', support_email: '',
+    support_phone: '', default_shipping: 'post_pishtaz', currency: 'تومان',
+  });
+
+  // Slides
+  const [slides, setSlides] = useState<Slide[]>([]);
+  const [editSlide, setEditSlide] = useState<Slide | null>(null);
+  const [showSlideForm, setShowSlideForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  // Sections
+  const [sections, setSections] = useState<Section[]>([]);
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
-      api.get<Category[]>('/categories'),
       api.get<Record<string, string>>('/settings'),
-    ]).then(([cats, settings]) => {
-      setCategories(cats);
+      api.get<Slide[]>('/slides'),
+      api.get<Category[]>('/categories'),
+    ]).then(([settings, slidesData, cats]) => {
       setForm({
         site_name: settings.site_name || 'اطلس شاپ',
         site_description: settings.site_description || '',
@@ -52,57 +57,115 @@ export default function SettingsPage() {
         default_shipping: settings.default_shipping || 'post_pishtaz',
         currency: settings.currency || 'تومان',
       });
-      if (settings.slides) {
-        try { setSlides(JSON.parse(settings.slides)); } catch {}
-      }
+      setSlides(slidesData);
+      setCategories(cats);
       if (settings.sections) {
         try { setSections(JSON.parse(settings.sections)); } catch {}
       }
-    }).catch(console.error)
+    }).catch((err) => addToast('خطا در بارگذاری تنظیمات', 'error'))
     .finally(() => setLoading(false));
   }, []);
 
-  const handleSave = async (e: FormEvent) => {
+  const handleSaveGeneral = async (e: FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     try {
-      await api.put('/settings', {
-        ...form,
-        slides: JSON.stringify(slides),
-        sections: JSON.stringify(sections),
-      });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } catch (err) { alert(err); }
+      await api.put('/settings', form);
+      addToast('تنظیمات ذخیره شد', 'success');
+    } catch { addToast('خطا در ذخیره', 'error'); }
+    finally { setSaving(false); }
   };
 
-  const addSlide = () => setSlides([...slides, { bg: 'from-[#ef4056] to-[#d8364a]', title: '', desc: '' }]);
-  const removeSlide = (i: number) => setSlides(slides.filter((_, idx) => idx !== i));
-  const updateSlide = (i: number, field: keyof Slide, value: string) => {
-    const copy = [...slides]; copy[i] = { ...copy[i], [field]: value }; setSlides(copy);
+  const handleUploadImage = async (file: File): Promise<string> => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = localStorage.getItem('atlas_token');
+    const res = await fetch('http://localhost:8000/api/v1/upload', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    setUploading(false);
+    if (!res.ok) throw new Error('Upload failed');
+    const data = await res.json();
+    return data.url;
+  };
+
+  const resetSlideForm = () => setEditSlide({
+    title: '', description: '', bgColor: gradients[0], image: '', link: '', sortOrder: slides.length, isActive: true,
+  });
+
+  const openNewSlide = () => { resetSlideForm(); setShowSlideForm(true); };
+  const openEditSlide = (s: Slide) => { setEditSlide({ ...s }); setShowSlideForm(true); };
+
+  const handleSaveSlide = async () => {
+    if (!editSlide || !editSlide.title.trim()) return addToast('عنوان اسلاید الزامی است', 'error');
+    setSaving(true);
+    try {
+      if (editSlide.id) {
+        const updated = await api.put<Slide>(`/slides/${editSlide.id}`, editSlide);
+        setSlides(slides.map((s) => s.id === editSlide.id ? updated : s));
+        addToast('اسلاید بروزرسانی شد', 'success');
+      } else {
+        const created = await api.post<Slide>('/slides', editSlide);
+        setSlides([...slides, created]);
+        addToast('اسلاید ایجاد شد', 'success');
+      }
+      setShowSlideForm(false);
+    } catch { addToast('خطا در ذخیره اسلاید', 'error'); }
+    finally { setSaving(false); }
+  };
+
+  const handleDeleteSlide = async (id: number) => {
+    if (!confirm('حذف شود؟')) return;
+    try {
+      await api.delete(`/slides/${id}`);
+      setSlides(slides.filter((s) => s.id !== id));
+      addToast('اسلاید حذف شد', 'success');
+    } catch { addToast('خطا در حذف', 'error'); }
   };
 
   const addSection = () => setSections([...sections, { type: 'products', title: '', sort: 'newest', count: 12 }]);
   const removeSection = (i: number) => setSections(sections.filter((_, idx) => idx !== i));
-  const updateSection = (i: number, field: keyof Section, value: any) => {
+  const updateSection = (i: number, field: string, value: any) => {
     const copy = [...sections]; (copy[i] as any)[field] = value; setSections(copy);
   };
 
-  if (loading) return <p className="text-gray-500">در حال بارگذاری...</p>;
+  const handleSaveSections = async () => {
+    setSaving(true);
+    try {
+      await api.put('/settings', { sections: JSON.stringify(sections) });
+      addToast('سکشن‌ها ذخیره شدند', 'success');
+    } catch { addToast('خطا در ذخیره', 'error'); }
+    finally { setSaving(false); }
+  };
 
-  const gradients = [
-    'from-[#ef4056] to-[#d8364a]', 'from-[#19bfd3] to-[#1599a8]',
-    'from-[#f9a825] to-[#e8960c]', 'from-[#6b21a8] to-[#581c87]',
-    'from-[#059669] to-[#047857]', 'from-[#2563eb] to-[#1d4ed8]',
-  ];
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="animate-spin w-8 h-8 border-2 border-[var(--dk-primary)] border-t-transparent rounded-full" /></div>;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6" dir="rtl">
       <h2 className="text-xl font-semibold">تنظیمات فروشگاه</h2>
 
-      <form onSubmit={handleSave} className="space-y-8 max-w-3xl">
-        {/* Basic */}
-        <div className="bg-white rounded-xl p-5 shadow-sm border space-y-4">
-          <h3 className="font-semibold text-sm">اطلاعات پایه</h3>
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-gray-200 pb-3">
+        {[
+          { id: 'general', label: 'عمومی' },
+          { id: 'slides', label: 'اسلایدرها' },
+          { id: 'sections', label: 'سکشن‌ها' },
+        ].map((t) => (
+          <button key={t.id} onClick={() => setTab(t.id as any)}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
+              tab === t.id ? 'bg-[var(--dk-primary)] text-white' : 'text-gray-600 hover:bg-gray-100'
+            }`}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {tab === 'general' && (
+        <form onSubmit={handleSaveGeneral} className="bg-white rounded-xl p-6 shadow-sm border space-y-4 max-w-2xl">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">نام فروشگاه</label>
@@ -140,113 +203,211 @@ export default function SettingsPage() {
               </select>
             </div>
           </div>
-        </div>
+          <button type="submit" disabled={saving}
+            className="rounded-lg bg-indigo-600 px-8 py-2.5 text-sm text-white hover:bg-indigo-700 disabled:opacity-50">
+            {saving ? 'در حال ذخیره...' : 'ذخیره تنظیمات'}
+          </button>
+        </form>
+      )}
 
-        {/* Slides */}
-        <div className="bg-white rounded-xl p-5 shadow-sm border space-y-4">
+      {tab === 'slides' && (
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm">اسلایدر‌های صفحه اصلی</h3>
-            <button type="button" onClick={addSlide} className="text-sm text-indigo-600 hover:underline">+ افزودن اسلاید</button>
+            <p className="text-sm text-gray-500">{slides.length} اسلاید</p>
+            <button onClick={openNewSlide}
+              className="rounded-lg bg-[var(--dk-primary)] text-white px-4 py-2 text-sm hover:brightness-110 transition">
+              + اسلاید جدید
+            </button>
           </div>
-          {slides.map((slide, i) => (
-            <div key={i} className="border rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">اسلاید {i + 1}</span>
-                <button type="button" onClick={() => removeSlide(i)} className="text-xs text-red-500 hover:underline">حذف</button>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="text-xs text-gray-500">عنوان</label>
-                  <input type="text" className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={slide.title}
-                    onChange={(e) => updateSlide(i, 'title', e.target.value)} />
+
+          {/* Slide Form Modal */}
+          {showSlideForm && editSlide && (
+            <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setShowSlideForm(false)}>
+              <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto space-y-4" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">{editSlide.id ? 'ویرایش اسلاید' : 'اسلاید جدید'}</h3>
+                  <button onClick={() => setShowSlideForm(false)} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
                 </div>
-                <div className="col-span-2">
-                  <label className="text-xs text-gray-500">توضیحات</label>
-                  <input type="text" className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={slide.desc}
-                    onChange={(e) => updateSlide(i, 'desc', e.target.value)} />
+
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">عنوان</label>
+                  <input type="text" className="w-full rounded-lg border px-3 py-2 text-sm" value={editSlide.title}
+                    onChange={(e) => setEditSlide({ ...editSlide, title: e.target.value })} />
                 </div>
-                <div className="col-span-2">
-                  <label className="text-xs text-gray-500">رنگ پس‌زمینه (گرادینت)</label>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">توضیحات</label>
+                  <input type="text" className="w-full rounded-lg border px-3 py-2 text-sm" value={editSlide.description}
+                    onChange={(e) => setEditSlide({ ...editSlide, description: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">لینک</label>
+                  <input type="text" className="w-full rounded-lg border px-3 py-2 text-sm" value={editSlide.link}
+                    onChange={(e) => setEditSlide({ ...editSlide, link: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">ترتیب</label>
+                    <input type="number" className="w-full rounded-lg border px-3 py-2 text-sm" value={editSlide.sortOrder}
+                      onChange={(e) => setEditSlide({ ...editSlide, sortOrder: Number(e.target.value) })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">وضعیت</label>
+                    <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                      <input type="checkbox" checked={editSlide.isActive}
+                        onChange={(e) => setEditSlide({ ...editSlide, isActive: e.target.checked })}
+                        className="w-4 h-4 rounded border-gray-300 text-indigo-600" />
+                      <span className="text-sm">فعال</span>
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">رنگ پس‌زمینه</label>
+                  <div className="flex flex-wrap gap-2">
                     {gradients.map((g) => (
-                      <button key={g} type="button" onClick={() => updateSlide(i, 'bg', g)}
-                        className={`w-8 h-8 rounded-lg bg-gradient-to-br ${g} ${slide.bg === g ? 'ring-2 ring-indigo-500 ring-offset-2' : ''}`} />
+                      <button key={g} type="button" onClick={() => setEditSlide({ ...editSlide, bgColor: g })}
+                        className={`w-8 h-8 rounded-lg bg-gradient-to-br ${g} ${editSlide.bgColor === g ? 'ring-2 ring-indigo-500 ring-offset-2' : ''}`} />
                     ))}
                   </div>
                 </div>
-              </div>
-              <div className={`h-20 rounded-lg bg-gradient-to-br ${slide.bg} flex items-center px-4`}>
-                <div className="text-white">
-                  <p className="text-sm font-bold">{slide.title || 'عنوان اسلاید'}</p>
-                  <p className="text-xs text-white/70">{slide.desc || 'توضیحات'}</p>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">تصویر اسلاید</label>
+                  <input type="file" accept="image/*" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const url = await handleUploadImage(file);
+                      setEditSlide({ ...editSlide, image: url });
+                    } catch { addToast('خطا در آپلود تصویر', 'error'); }
+                  }} className="w-full text-sm" />
+                  {uploading && <p className="text-xs text-indigo-500 mt-1">در حال آپلود...</p>}
+                  {editSlide.image && (
+                    <img src={`http://localhost:8000${editSlide.image}`} alt="preview"
+                      className="mt-2 h-24 rounded-lg object-cover" />
+                  )}
                 </div>
+                <div className={`h-16 rounded-lg bg-gradient-to-br ${editSlide.bgColor} flex items-center px-4`}>
+                  <div className="text-white">
+                    <p className="text-sm font-bold">{editSlide.title || 'عنوان'}</p>
+                    <p className="text-xs text-white/70">{editSlide.description || 'توضیحات'}</p>
+                  </div>
+                </div>
+                <button onClick={handleSaveSlide} disabled={saving}
+                  className="w-full rounded-lg bg-indigo-600 text-white py-2.5 text-sm hover:bg-indigo-700 disabled:opacity-50">
+                  {saving ? 'در حال ذخیره...' : 'ذخیره'}
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+          )}
 
-        {/* Sections */}
-        <div className="bg-white rounded-xl p-5 shadow-sm border space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm">سکشن‌های صفحه اصلی</h3>
-            <button type="button" onClick={addSection} className="text-sm text-indigo-600 hover:underline">+ افزودن سکشن</button>
-          </div>
-          {sections.map((sec, i) => (
-            <div key={i} className="border rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">سکشن {i + 1}</span>
-                <button type="button" onClick={() => removeSection(i)} className="text-xs text-red-500 hover:underline">حذف</button>
+          {/* Slides List */}
+          <div className="space-y-3">
+            {slides.map((slide) => (
+              <div key={slide.id} className="bg-white rounded-xl p-4 border shadow-sm flex items-center gap-4">
+                <div className={`w-24 h-16 rounded-lg bg-gradient-to-br ${slide.bgColor} flex items-center justify-center shrink-0`}>
+                  {slide.image ? (
+                    <img src={`http://localhost:8000${slide.image}`} alt="" className="w-full h-full object-cover rounded-lg" />
+                  ) : (
+                    <span className="text-white text-lg font-bold">{slide.title?.[0] || 'S'}</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-medium truncate">{slide.title}</h4>
+                  <p className="text-xs text-gray-500 truncate">{slide.description || 'بدون توضیحات'}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${slide.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {slide.isActive ? 'فعال' : 'غیرفعال'}
+                    </span>
+                    <span className="text-[10px] text-gray-400">ترتیب: {slide.sortOrder}</span>
+                  </div>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button onClick={() => openEditSlide(slide)}
+                    className="px-3 py-1.5 text-xs rounded-lg border border-gray-200 hover:bg-gray-50 transition">
+                    ویرایش
+                  </button>
+                  <button onClick={() => slide.id && handleDeleteSlide(slide.id)}
+                    className="px-3 py-1.5 text-xs rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition">
+                    حذف
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="text-xs text-gray-500">عنوان سکشن</label>
-                  <input type="text" className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={sec.title}
-                    onChange={(e) => updateSection(i, 'title', e.target.value)} />
+            ))}
+            {slides.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <p>هیچ اسلایدی وجود ندارد. اولین اسلاید را ایجاد کنید.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {tab === 'sections' && (
+        <div className="space-y-4 max-w-2xl">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500">{sections.length} سکشن</p>
+            <button onClick={addSection}
+              className="rounded-lg bg-[var(--dk-primary)] text-white px-4 py-2 text-sm hover:brightness-110 transition">
+              + سکشن جدید
+            </button>
+          </div>
+          <div className="space-y-3">
+            {sections.map((sec, i) => (
+              <div key={i} className="bg-white rounded-xl p-4 border shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-gray-500">سکشن {i + 1}</span>
+                  <button onClick={() => removeSection(i)} className="text-xs text-red-500 hover:underline">حذف</button>
                 </div>
-                <div>
-                  <label className="text-xs text-gray-500">نوع</label>
-                  <select className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={sec.type}
-                    onChange={(e) => updateSection(i, 'type', e.target.value)}>
-                    <option value="products">محصولات</option>
-                    <option value="category">دسته‌بندی خاص</option>
-                  </select>
-                </div>
-                {sec.type === 'category' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="text-xs text-gray-500">عنوان</label>
+                    <input type="text" className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={sec.title}
+                      onChange={(e) => updateSection(i, 'title', e.target.value)} />
+                  </div>
                   <div>
-                    <label className="text-xs text-gray-500">دسته‌بندی</label>
-                    <select className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={sec.categoryId || ''}
-                      onChange={(e) => updateSection(i, 'categoryId', Number(e.target.value))}>
-                      <option value="">انتخاب کنید</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
+                    <label className="text-xs text-gray-500">نوع</label>
+                    <select className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={sec.type}
+                      onChange={(e) => updateSection(i, 'type', e.target.value)}>
+                      <option value="products">محصولات</option>
+                      <option value="category">دسته‌بندی خاص</option>
                     </select>
                   </div>
-                )}
-                <div>
-                  <label className="text-xs text-gray-500">مرتب‌سازی</label>
-                  <select className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={sec.sort}
-                    onChange={(e) => updateSection(i, 'sort', e.target.value)}>
-                    <option value="newest">جدیدترین</option>
-                    <option value="cheapest">ارزان‌ترین</option>
-                    <option value="expensive">گران‌ترین</option>
-                    <option value="popular">محبوب‌ترین</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500">تعداد محصولات</label>
-                  <input type="number" className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={sec.count}
-                    onChange={(e) => updateSection(i, 'count', Number(e.target.value))} />
+                  {sec.type === 'category' && (
+                    <div>
+                      <label className="text-xs text-gray-500">دسته‌بندی</label>
+                      <select className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={sec.categoryId || ''}
+                        onChange={(e) => updateSection(i, 'categoryId', Number(e.target.value))}>
+                        <option value="">انتخاب کنید</option>
+                        {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-xs text-gray-500">مرتب‌سازی</label>
+                    <select className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={sec.sort}
+                      onChange={(e) => updateSection(i, 'sort', e.target.value)}>
+                      <option value="newest">جدیدترین</option>
+                      <option value="cheapest">ارزان‌ترین</option>
+                      <option value="expensive">گران‌ترین</option>
+                      <option value="popular">محبوب‌ترین</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">تعداد</label>
+                    <input type="number" className="w-full rounded-lg border px-3 py-1.5 text-sm mt-1" value={sec.count}
+                      onChange={(e) => updateSection(i, 'count', Number(e.target.value))} />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          {sections.length > 0 && (
+            <button onClick={handleSaveSections} disabled={saving}
+              className="rounded-lg bg-indigo-600 px-8 py-2.5 text-sm text-white hover:bg-indigo-700 disabled:opacity-50">
+              {saving ? 'در حال ذخیره...' : 'ذخیره سکشن‌ها'}
+            </button>
+          )}
         </div>
-
-        <button type="submit" className="rounded-lg bg-indigo-600 px-8 py-2.5 text-sm text-white hover:bg-indigo-700">
-          {saved ? '✓ ذخیره شد' : 'ذخیره تنظیمات'}
-        </button>
-      </form>
+      )}
     </div>
   );
 }

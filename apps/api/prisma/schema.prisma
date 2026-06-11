@@ -210,3 +210,16 @@ model SiteConfig {
   key   String @unique
   value String
 }
+
+model SiteSlide {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  bgColor     String   @default("from-[#ef4056] to-[#d8364a]")
+  image       String?
+  link        String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

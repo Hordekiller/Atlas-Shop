@@ -27,36 +27,64 @@ export class ProductsService {
     maxPrice?: number;
     type?: string;
     sort?: string;
+    hasDiscount?: string;
   }) {
     const page = query.page || 1;
     const limit = Math.min(query.limit || 20, 100);
     const skip = (page - 1) * limit;
 
-    const where: any = { isActive: true };
+    const conditions: any[] = [];
 
     if (query.search) {
-      where.OR = [
-        { title: { contains: query.search } },
-        { description: { contains: query.search } },
-      ];
+      conditions.push({
+        OR: [
+          { title: { contains: query.search } },
+          { description: { contains: query.search } },
+        ],
+      });
     }
 
-    if (query.categoryId) where.categoryId = query.categoryId;
-    if (query.shopId) where.shopId = query.shopId;
-    if (query.type) where.type = query.type;
+    if (query.categoryId) conditions.push({ categoryId: query.categoryId });
+    if (query.shopId) conditions.push({ shopId: query.shopId });
+    if (query.type) conditions.push({ type: query.type });
 
-    if (query.minPrice || query.maxPrice) {
-      where.price = {};
-      if (query.minPrice) where.price.gte = query.minPrice;
-      if (query.maxPrice) where.price.lte = query.maxPrice;
+    if (query.hasDiscount === 'true') {
+      conditions.push({ salePrice: { not: null } });
     }
 
-    const orderBy: any = {};
-    if (query.sort === 'price_asc') orderBy.price = 'asc';
-    else if (query.sort === 'price_desc') orderBy.price = 'desc';
-    else if (query.sort === 'newest') orderBy.createdAt = 'desc';
-    else if (query.sort === 'oldest') orderBy.createdAt = 'asc';
-    else orderBy.createdAt = 'desc';
+    const priceFilter: any = {};
+    if (query.minPrice) priceFilter.gte = query.minPrice;
+    if (query.maxPrice) priceFilter.lte = query.maxPrice;
+    if (Object.keys(priceFilter).length > 0) {
+      conditions.push({
+        OR: [
+          { price: priceFilter },
+          { salePrice: priceFilter },
+        ],
+      });
+    }
+
+    const where: any = { isActive: true };
+    if (conditions.length > 0) {
+      where.AND = conditions;
+    }
+
+    let orderBy: any;
+    if (query.sort === 'cheapest') {
+      orderBy = [{ salePrice: { sort: 'asc', nulls: 'last' } }, { price: 'asc' }];
+    } else if (query.sort === 'expensive') {
+      orderBy = [{ salePrice: { sort: 'desc', nulls: 'last' } }, { price: 'desc' }];
+    } else if (query.sort === 'price_asc') {
+      orderBy = { price: 'asc' };
+    } else if (query.sort === 'price_desc') {
+      orderBy = { price: 'desc' };
+    } else if (query.sort === 'newest') {
+      orderBy = { createdAt: 'desc' };
+    } else if (query.sort === 'oldest') {
+      orderBy = { createdAt: 'asc' };
+    } else {
+      orderBy = { createdAt: 'desc' };
+    }
 
     const [products, total] = await Promise.all([
       this.prisma.product.findMany({

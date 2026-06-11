@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { ToastProvider } from '@/context/ToastContext';
 import "./globals.css";
 
 const sidebarItems = [
@@ -101,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </aside>
 
             <div className="flex-1 p-6 overflow-auto animate-fade-in">
-              {children}
+              <ToastProvider>{children}</ToastProvider>
             </div>
           </div>
         </main>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CartProvider } from "@/context/CartContext";
+import { ToastProvider } from "@/context/ToastContext";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import "./globals.css";
 
@@ -21,8 +22,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fa" dir="rtl">
       <body className="pb-14 md:pb-0" style={{ background: 'var(--dk-bg)', color: 'var(--dk-text)' }}>
         <CartProvider>
-          {children}
-          <MobileBottomNav />
+          <ToastProvider>
+            {children}
+            <MobileBottomNav />
+          </ToastProvider>
         </CartProvider>
       </body>
     </html>

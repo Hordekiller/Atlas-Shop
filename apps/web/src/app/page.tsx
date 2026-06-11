@@ -40,13 +40,14 @@ export default function HomePage() {
       api.get<{ data: Product[] }>('/products?sort=newest&take=12'),
       api.get<{ data: Product[] }>('/products?sort=newest&take=8'),
       api.get<{ id: number; name: string; slug: string }[]>('/categories'),
-      api.get<{ slides: Slide[]; sections: Section[] }>('/settings/public'),
+      api.get<Slide[]>('/slides/active'),
+      api.get<{ sections: Section[] }>('/settings/public'),
     ])
-      .then(([prodRes, amaRes, cats, settings]) => {
+      .then(([prodRes, amaRes, cats, slidesData, settings]) => {
         setProducts(prodRes.data);
         setAmazing(amaRes.data);
         setCategories(cats);
-        setSlides(settings.slides || []);
+        setSlides(slidesData || []);
         setSections(settings.sections || []);
       })
       .finally(() => setLoading(false));

@@ -14,6 +14,7 @@ import { ShippingModule } from './modules/shipping/shipping.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { SettingsModule } from './modules/settings/settings.module';
+import { SlidesModule } from './modules/slides/slides.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { SettingsModule } from './modules/settings/settings.module';
     ShippingModule,
     UploadModule,
     SettingsModule,
+    SlidesModule,
   ],
 })
 export class AppModule {}
