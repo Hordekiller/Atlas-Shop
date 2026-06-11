@@ -12,7 +12,7 @@ interface Product {
   category?: { id: number; name: string };
 }
 interface Category { id: number; name: string; slug: string }
-interface Slide { bg: string; title: string; desc: string }
+interface Slide { id?: number; title: string; description: string; bgColor: string; image?: string; link?: string; isActive?: boolean }
 interface Section { type: string; title: string; sort: string; count: number; categoryId?: number }
 
 export default function HomePage() {
@@ -77,28 +77,36 @@ export default function HomePage() {
       {/* Hero Banner */}
       {slides.length > 0 && (
         <section className="dk-container pt-4">
-          <div className="relative rounded-2xl overflow-hidden h-[340px]">
+          <div className="relative rounded-2xl overflow-hidden h-[200px] md:h-[340px]">
             {slides.map((slide, i) => (
-              <div
+              <Link
                 key={i}
-                className={`absolute inset-0 bg-gradient-to-br ${slide.bg} flex items-center px-12 transition-opacity duration-500 ${i === slideIdx ? 'opacity-100' : 'opacity-0'}`}
+                href={slide.link || '/products'}
+                className={`absolute inset-0 bg-gradient-to-br ${slide.bgColor} flex items-center px-6 md:px-12 transition-opacity duration-500 ${i === slideIdx ? 'opacity-100' : 'opacity-0'}`}
               >
-                <div className="text-white">
-                  <h2 className="text-3xl font-bold mb-3">{slide.title}</h2>
-                  <p className="text-white/80 mb-6">{slide.desc}</p>
-                  <Link href="/products" className="inline-block bg-white/20 backdrop-blur-sm rounded-lg px-6 py-2.5 text-sm font-medium hover:bg-white/30 transition">
+                {slide.image && (
+                  <img
+                    src={`http://localhost:8000${slide.image}`}
+                    alt={slide.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
+                <div className="relative z-10 text-white max-w-xl">
+                  <h2 className="text-lg md:text-3xl font-bold mb-1 md:mb-3">{slide.title}</h2>
+                  <p className="text-xs md:text-base text-white/80 mb-3 md:mb-6">{slide.description}</p>
+                  <span className="inline-block bg-white/20 backdrop-blur-sm rounded-lg px-4 md:px-6 py-1.5 md:py-2.5 text-xs md:text-sm font-medium hover:bg-white/30 transition">
                     مشاهده محصولات
-                  </Link>
+                  </span>
                 </div>
-              </div>
+              </Link>
             ))}
             {/* Dots */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
               {slides.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => setSlideIdx(i)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all ${i === slideIdx ? 'bg-white w-8' : 'bg-white/50'}`}
+                  onClick={(e) => { e.preventDefault(); setSlideIdx(i); }}
+                  className={`w-2 md:w-2.5 h-2 md:h-2.5 rounded-full transition-all ${i === slideIdx ? 'bg-white w-6 md:w-8' : 'bg-white/50'}`}
                 />
               ))}
             </div>
