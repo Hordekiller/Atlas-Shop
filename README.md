@@ -8,9 +8,11 @@
 ![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?style=for-the-badge&logo=nestjs)
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js)
 ![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?style=for-the-badge&logo=prisma)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwind-css)
-![Turborepo](https://img.shields.io/badge/Turborepo-2-EF4444?style=for-the-badge&logo=turborepo)
+![Turborepo](https://img.shields.io/badge/Turborepo-2-EF4446?style=for-the-badge&logo=turborepo)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
 ---
 
@@ -25,6 +27,7 @@
 <div dir="rtl">
 
 ### 🏪 فروشگاه (مشتری)
+
 - **صفحه اصلی** — نمایش بنر، محصولات ویژه، دسته‌بندی‌ها
 - **صفحه محصولات** — جستجو، فیلتر بر اساس دسته و قیمت، مرتب‌سازی و صفحه‌بندی
 - **جزئیات محصول** — تصاویر، قیمت، نظرات کاربران، افزودن به سبد خرید
@@ -34,6 +37,7 @@
 - **احراز هویت** — ورود / ثبت‌نام با JWT
 
 ### 👑 پنل مدیریت
+
 - **داشبورد** — آمار واقعی فروش، سفارشات، کاربران، محصولات
 - **مدیریت محصولات** — CRUD کامل با آپلود تصویر، قیمت‌گذاری، دسته‌بندی
 - **مدیریت دسته‌بندی‌ها** — سلسله‌مراتب دسته‌بندی (والد/فرزند)
@@ -45,33 +49,39 @@
 - **تنظیمات** — تنظیمات فروشگاه
 
 ### 🧑‍💼 پنل فروشنده
+
 - **داشبورد فروشنده** — آمار فروشگاه شخصی (محصولات، سفارشات، درآمد)
 - **محصولات من** — مدیریت محصولات فروشگاه خود
 - **سفارشات من** — مشاهده سفارشات مربوط به محصولات خود
 
 ### 💳 درگاه‌های پرداخت
+
 - **زرین‌پال** — یکپارچه‌سازی واقعی با API v4
 - **بانک ملت** — شبیه‌سازی شده (قابل اتصال واقعی)
 - **بانک سامان** — شبیه‌سازی شده (قابل اتصال واقعی)
 
 ### 📦 روش‌های ارسال
+
 - پست پیشتاز / سفارشی
 - تیپاکس
 - ماهکس
 - اسنپ‌باکس
 
 ### 🌐 فارسی‌سازی کامل
+
 - **RTL** — پشتیبانی کامل از راست‌به‌چپ
 - **تاریخ شمسی** — با کتابخانه `date-fns-jalali`
 - **اعداد فارسی** — نمایش اعداد به صورت فارسی
 - **UI کاملاً فارسی** — تمام رابط‌های کاربری به زبان فارسی
 
 ### 🐳 Docker
+
 - **Dockerfile** مجزا برای API، فروشگاه و پنل ادمین
 - **docker-compose.yml** با Nginx reverse proxy
 - آماده استقرار در تولید
 
 ### 🔄 CI/CD
+
 - **GitHub Actions** — lint + build + smoke test خودکار
 
 </div>
@@ -116,10 +126,10 @@ atlas-shop/
 └──────┘  └────────┘  └────┬─────┘
                            │
                            ▼
-                    ┌──────────────┐
-                    │   Prisma     │
-                    │   (SQLite)   │
-                    └──────────────┘
+                     ┌──────────────┐
+                     │   Prisma     │
+                     │ (PostgreSQL) │
+                     └──────────────┘
 ```
 
 </div>
@@ -130,20 +140,20 @@ atlas-shop/
 
 <div dir="rtl">
 
-| بخش | تکنولوژی |
-|------|----------|
-| **Backend** | NestJS 11, Prisma 5, Passport JWT, Swagger, Multer |
-| **Frontend (فروشگاه)** | Next.js 16, React 19, Tailwind CSS 4 |
-| **Frontend (ادمین)** | Next.js 16, React 19, Tailwind CSS 4 |
-| **دیتابیس** | SQLite (توسعه) / PostgreSQL (تولید) |
-| **مونورپو** | Turborepo 2, npm workspaces |
-| **زبان** | TypeScript 5 (تمامی بخش‌ها) |
-| **احراز هویت** | JWT (bcryptjs) |
-| **مستندات API** | Swagger (OpenAPI) |
-| **CI/CD** | GitHub Actions |
-| **Container** | Docker + docker-compose |
-| **تاریخ شمسی** | date-fns-jalali |
-| **درگاه پرداخت** | Zarinpal API v4 |
+| بخش                    | تکنولوژی                                           |
+| ---------------------- | -------------------------------------------------- |
+| **Backend**            | NestJS 11, Prisma 5, Passport JWT, Swagger, Multer |
+| **Frontend (فروشگاه)** | Next.js 16, React 19, Tailwind CSS 4               |
+| **Frontend (ادمین)**   | Next.js 16, React 19, Tailwind CSS 4               |
+| **دیتابیس**            | PostgreSQL 16                                      |
+| **مونورپو**            | Turborepo 2, npm workspaces                        |
+| **زبان**               | TypeScript 5 (تمامی بخش‌ها)                        |
+| **احراز هویت**         | JWT (bcryptjs)                                     |
+| **مستندات API**        | Swagger (OpenAPI)                                  |
+| **CI/CD**              | GitHub Actions                                     |
+| **Container**          | Docker + docker-compose                            |
+| **تاریخ شمسی**         | date-fns-jalali                                    |
+| **درگاه پرداخت**       | Zarinpal API v4                                    |
 
 </div>
 
@@ -157,6 +167,7 @@ atlas-shop/
 
 - Node.js ≥ 22
 - npm ≥ 10
+- PostgreSQL ≥ 16 (و یک دیتابیس خالی به نام `atlas_shop`)
 
 </div>
 
@@ -169,17 +180,21 @@ atlas-shop/
 git clone https://github.com/Hordekiller/shop-sor.git
 cd "shop sor"
 
-# ۲. نصب وابستگی‌ها
+# ۲. تنظیم متغیرهای محیطی
+cp .env.example apps/api/.env
+# سپس فایل apps/api/.env را ویرایش کنید و مقادیر واقعی را وارد کنید
+
+# ۳. نصب وابستگی‌ها
 npm install
 
-# ۳. راه‌اندازی دیتابیس
-npm run db:push -w @atlas-shop/api
+# ۴. راه‌اندازی دیتابیس (migration)
+npm run db:migrate -w @atlas-shop/api
 npm run db:generate -w @atlas-shop/api
 
-# ۴. پر کردن دیتابیس با داده‌های اولیه
+# ۵. پر کردن دیتابیس با داده‌های اولیه
 npm run db:seed -w @atlas-shop/api
 
-# ۵. اجرای همزمان همه سرویس‌ها
+# ۶. اجرای همزمان همه سرویس‌ها
 npm run dev
 ```
 
@@ -189,10 +204,10 @@ npm run dev
 
 <div dir="rtl">
 
-| نقش | ایمیل | رمز عبور |
-|------|-------|----------|
+| نقش            | ایمیل                  | رمز عبور   |
+| -------------- | ---------------------- | ---------- |
 | **مدیر سیستم** | `admin@atlas-shop.com` | `admin123` |
-| **مشتری** | ثبت‌نام از طریق سایت | — |
+| **مشتری**      | ثبت‌نام از طریق سایت   | —          |
 
 > اولین کاربر ثبت‌نام‌کننده به صورت خودکار نقش **SUPER_ADMIN** می‌گیرد.
 
@@ -202,11 +217,11 @@ npm run dev
 
 <div dir="rtl">
 
-| سرویس | آدرس |
-|-------|------|
-| فروشگاه | http://localhost:3000 |
-| پنل مدیریت | http://localhost:3001 |
-| API | http://localhost:8000/api/v1 |
+| سرویس       | آدرس                           |
+| ----------- | ------------------------------ |
+| فروشگاه     | http://localhost:3000          |
+| پنل مدیریت  | http://localhost:3001          |
+| API         | http://localhost:8000/api/v1   |
 | مستندات API | http://localhost:8000/api/docs |
 
 </div>
@@ -230,11 +245,11 @@ docker compose up -d
 
 ### متغیرهای محیطی Docker
 
-| متغیر | توضیح | پیش‌فرض |
-|-------|-------|---------|
-| `JWT_SECRET` | کلید امضای JWT | `change-this-secret-in-production` |
-| `ZARINPAL_MERCHANT_ID` | شناسه درگاه زرین‌پال | — |
-| `ZARINPAL_CALLBACK_URL` | آدرس بازگشت پرداخت | `http://localhost:8000/api/v1/payments/verify` |
+| متغیر                   | توضیح                | پیش‌فرض                                        |
+| ----------------------- | -------------------- | ---------------------------------------------- |
+| `JWT_SECRET`            | کلید امضای JWT       | `change-this-secret-in-production`             |
+| `ZARINPAL_MERCHANT_ID`  | شناسه درگاه زرین‌پال | —                                              |
+| `ZARINPAL_CALLBACK_URL` | آدرس بازگشت پرداخت   | `http://localhost:8000/api/v1/payments/verify` |
 
 </div>
 
@@ -246,12 +261,12 @@ docker compose up -d
 
 > 👷 به زودی...
 
-| بخش | تصویر |
-|-----|-------|
-| 🏪 فروشگاه | ![]() |
-| 👑 پنل مدیریت | ![]() |
+| بخش             | تصویر |
+| --------------- | ----- |
+| 🏪 فروشگاه      | ![]() |
+| 👑 پنل مدیریت   | ![]() |
 | 🧾 جزئیات سفارش | ![]() |
-| 📊 داشبورد | ![]() |
+| 📊 داشبورد      | ![]() |
 
 </div>
 
@@ -289,6 +304,41 @@ docker compose up -d
 ```
 
 مستندات کامل Swagger در آدرس `/api/docs` در دسترس است.
+
+</div>
+
+---
+
+## 🗺️ نقشه راه
+
+<div dir="rtl">
+
+### ✅ انجام شده
+
+- [x] احراز هویت (JWT) با ثبت‌نام و ورود
+- [x] مدیریت محصولات (CRUD + آپلود تصویر)
+- [x] دسته‌بندی سلسله‌مراتبی
+- [x] سبد خرید و تسویه حساب
+- [x] پنل مدیریت کامل (داشبورد، سفارشات، کاربران، تخفیف‌ها)
+- [x] پنل فروشنده
+- [x] درگاه پرداخت زرین‌پال
+- [x] روش‌های ارسال (پست، تیپاکس، ماهکس، اسنپ‌باکس)
+- [x] تاریخ شمسی و RTL کامل
+- [x] Docker + docker-compose
+- [x] CI/CD با GitHub Actions
+- [x] مهاجرت از SQLite به PostgreSQL
+
+### 🔜 در دست توسعه
+
+- [ ] سیستم اطلاع‌رسانی (ایمیل، نوتیفیکیشن)
+- [ ] سیستم تخفیف‌های پیشرفته (کد تخفیف هوشمند)
+- [ ] انبارداری و موجودی
+- [ ] برگشت کالا و جریمه
+- [ ] کیف پول کاربران
+- [ ] سیستم ارجاع (Affiliate)
+- [ ] اپلیکیشن PWA
+- [ ] چندفروشندگی کامل
+- [ ] وبلاگ و سئو پیشرفته
 
 </div>
 
@@ -333,7 +383,7 @@ docker compose up -d
 
 <div dir="rtl">
 
-**پروژه شخصی** — تمامی حقوق محفوظ است.
+این پروژه تحت لایسنس **MIT** منتشر شده است. برای اطلاعات بیشتر فایل [LICENSE](./LICENSE) را ببینید.
 
 </div>
 

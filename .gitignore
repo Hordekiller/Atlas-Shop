@@ -1,31 +1,45 @@
+# Dependencies
 node_modules/
+
+# Builds
 dist/
+build/
 .next/
-turbo/
 .turbo/
-*.tsbuildinfo
+out/
 
 # Environment
 .env
 .env.local
 .env.*.local
 
-# Database
-*.db
-*.db-journal
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
 
 # OS
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.idea/
+.vscode/
+
+# Prisma / Database
+*.db
+*.db-journal
+
+# Coverage
+coverage/
 
 # Uploads
 uploads/
+
+# TypeScript
+*.tsbuildinfo
 
 # Next.js
 apps/*/next-env.d.ts

@@ -8,7 +8,7 @@ on:
 
 env:
   NODE_VERSION: 22
-  DATABASE_URL: "file:./prisma/test.db"
+  DATABASE_URL: "postgresql://atlas:atlas123@localhost:5432/atlas_shop_test?schema=public"
   JWT_SECRET: "ci-secret-key"
   JWT_EXPIRES_IN: "7d"
   PORT: 8000
@@ -17,6 +17,22 @@ jobs:
   lint:
     name: Lint & TypeCheck
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas123
+          POSTGRES_DB: atlas_shop_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -69,6 +85,22 @@ jobs:
     name: API Smoke Test
     runs-on: ubuntu-latest
     needs: build
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas123
+          POSTGRES_DB: atlas_shop_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -87,7 +119,7 @@ jobs:
         working-directory: apps/api
         run: |
           npx prisma db push --accept-data-loss
-          echo "Schema pushed to test.db"
+          echo "Schema pushed to PostgreSQL"
 
       - name: Build
         working-directory: apps/api
