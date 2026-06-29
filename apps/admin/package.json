@@ -23,7 +23,7 @@
     "@iconify/react": "^6.0.2",
     "@tailwindcss/typography": "^0.5.20",
     "@tanstack/react-table": "^8.21.3",
-    "@tiptap/extension-code-block-lowlight": "^3.26.0",
+    "@tiptap/extension-code-block-lowlight": "^3.27.1",
     "@tiptap/extension-color": "^3.26.0",
     "@tiptap/extension-image": "^3.26.0",
     "@tiptap/extension-link": "^3.26.0",
