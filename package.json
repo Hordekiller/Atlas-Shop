@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "prettier": "^3.2.0",
-    "turbo": "^2.0.0"
+    "turbo": "^2.10.0"
   },
   "packageManager": "npm@11.12.1",
   "workspaces": [
