@@ -12,6 +12,8 @@ env:
   JWT_SECRET: "ci-secret-key"
   JWT_EXPIRES_IN: "7d"
   PORT: 8000
+  CORS_ORIGIN: "http://localhost:3000,http://localhost:3001"
+  ENCRYPTION_KEY: "ci-encryption-key-do-not-use-in-production"
 
 jobs:
   lint:
