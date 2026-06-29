@@ -10,6 +10,9 @@ on:
         required: true
         default: "all"
 
+env:
+  NODE_VERSION: 22
+
 jobs:
   publish:
     name: Publish to GitHub Packages
@@ -23,9 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          registry-url: https://npm.pkg.github.com
-          scope: "@atlas-shop"
+          node-version: ${{ env.NODE_VERSION }}
 
       - run: npm ci
 
@@ -42,10 +43,10 @@ jobs:
         run: npm run build -w @atlas-shop/shared-types -w @atlas-shop/api-client 2>/dev/null || true
 
       - name: Publish packages
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           for name in ${{ steps.packages.outputs.names }}; do
             echo " Publishing $name..."
             npm publish -w "$name" --access public
           done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
