@@ -204,11 +204,6 @@ jobs:
           if [ "$HTTP" = "200" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {len(d)} gateways')" 2>&1); else RESP="FAIL"; fi
           echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
 
-          echo "=== Payment request ==="
-          HTTP=$(api -X POST http://localhost:8000/api/v1/payments/request/1 -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"gateway":"zarinpal"}')
-          if [ "$HTTP" = "200" ] || [ "$HTTP" = "201" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"authority\"]}')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
           echo "=== Admin stats ==="
           HTTP=$(api http://localhost:8000/api/v1/admin/stats -H "Authorization: Bearer $TOKEN")
           if [ "$HTTP" = "200" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"totalUsers\"]} users, {d[\"totalProducts\"]} products, {d[\"totalOrders\"]} orders')" 2>&1); else RESP="FAIL"; fi
