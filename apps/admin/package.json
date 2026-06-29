@@ -43,7 +43,7 @@
     "lowlight": "^3.3.0",
     "next": "^16.2.0",
     "react": "^19.0.0",
-    "react-apexcharts": "^2.1.0",
+    "react-apexcharts": "^2.1.1",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
