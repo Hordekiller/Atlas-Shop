@@ -13,15 +13,12 @@ export class ShippingService {
   }
 
   async getMethod(slug: string) {
-    const method = await this.prisma.shippingMethod.findUnique({
-      where: { slug },
-    });
-    if (!method) throw new NotFoundException("Shipping method not found");
-    return method;
+    return this.prisma.shippingMethod.findUnique({ where: { slug } });
   }
 
   async calculate(methodSlug: string, subtotal: number, weight?: number) {
     const method = await this.getMethod(methodSlug);
+    if (!method) return { valid: false, method: methodSlug, baseCost: 0, weightCost: 0, totalCost: 0, estimatedDays: null };
     const cost = subtotal >= method.freeThreshold.toNumber() ? 0 : method.basePrice.toNumber();
     let weightCost = 0;
     if (weight && weight > 0 && method.weightCost.greaterThan(0)) {
