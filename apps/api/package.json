@@ -56,7 +56,7 @@
     "@types/node": "^22.0.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/sanitize-html": "^2.16.1",
-    "eslint": "^9.0.0",
+    "eslint": "^10.6.0",
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.0",
