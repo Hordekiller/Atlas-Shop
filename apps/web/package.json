@@ -7,7 +7,7 @@
   "author": "فروشگاه اطلس",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Hordekiller/shop-sor.git"
+    "url": "https://github.com/Hordekiller/Atlas-Shop.git"
   },
   "scripts": {
     "dev": "next dev --port 3000",

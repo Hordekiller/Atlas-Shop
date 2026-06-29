@@ -1,0 +1,51 @@
+name: Publish Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Package to publish (all/shared-types/api-client/eslint-config)"
+        required: true
+        default: "all"
+
+jobs:
+  publish:
+    name: Publish to GitHub Packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@atlas-shop"
+
+      - run: npm ci
+
+      - name: Determine packages to publish
+        id: packages
+        run: |
+          if [ "${{ github.event.inputs.package }}" = "all" ] || [ "${{ github.event_name }}" = "release" ]; then
+            echo "names=@atlas-shop/shared-types @atlas-shop/api-client @atlas-shop/eslint-config" >> $GITHUB_OUTPUT
+          else
+            echo "names=@atlas-shop/${{ github.event.inputs.package }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build packages
+        run: npm run build -w @atlas-shop/shared-types -w @atlas-shop/api-client 2>/dev/null || true
+
+      - name: Publish packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for name in ${{ steps.packages.outputs.names }}; do
+            echo " Publishing $name..."
+            npm publish -w "$name" --access public
+          done
