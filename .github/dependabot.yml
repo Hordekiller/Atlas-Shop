@@ -1,0 +1,68 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: saturday
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+    groups:
+      nestjs:
+        patterns:
+          - "@nestjs/*"
+          - "nest-*"
+      nextjs:
+        patterns:
+          - "next"
+          - "next-*"
+          - "@next/*"
+      prisma:
+        patterns:
+          - "prisma"
+          - "@prisma/*"
+      react:
+        patterns:
+          - "react"
+          - "react-*"
+          - "@types/react"
+          - "@types/react-dom"
+      eslint:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@eslint/*"
+          - "@typescript-eslint/*"
+      turborepo:
+        patterns:
+          - "turbo"
+          - "@turbo/*"
+
+  - package-ecosystem: npm
+    directory: "/apps/api"
+    schedule:
+      interval: weekly
+      day: saturday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - api
+
+  - package-ecosystem: npm
+    directory: "/apps/web"
+    schedule:
+      interval: weekly
+      day: saturday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - web
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    labels:
+      - ci
