@@ -10,7 +10,8 @@ interface PageData {
   title: string;
   slug: string;
   content: string;
-  contentJson?: string;
+  contentJson?: string | { schema_version: number; sections: any[] };
+  customCss?: string | null;
   metaTitle: string | null;
   metaDesc: string | null;
 }
@@ -83,6 +84,7 @@ export default function PageSlug() {
         <PageBuilderRenderer
           contentJson={page.contentJson}
           globalColors={globalColors}
+          customCss={page.customCss}
         />
       </>
     );
@@ -93,6 +95,9 @@ export default function PageSlug() {
     <>
       <Header />
       <div className="dk-container py-8">
+        {page.customCss ? (
+          <style dangerouslySetInnerHTML={{ __html: page.customCss }} />
+        ) : null}
         <h1 className="text-2xl font-bold mb-6">{page.title}</h1>
         <div
           className="prose prose-sm max-w-none leading-relaxed"

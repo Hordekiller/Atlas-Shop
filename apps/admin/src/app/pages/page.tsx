@@ -10,6 +10,7 @@ interface Page {
   title: string;
   slug: string;
   content: string;
+  customCss?: string | null;
   metaTitle: string | null;
   metaDesc: string | null;
   isActive: boolean;
@@ -28,6 +29,7 @@ export default function PagesPage() {
     title: "",
     slug: "",
     content: "",
+    customCss: "",
     metaTitle: "",
     metaDesc: "",
     sortOrder: "0",
@@ -54,6 +56,7 @@ export default function PagesPage() {
       title: "",
       slug: "",
       content: "",
+      customCss: "",
       metaTitle: "",
       metaDesc: "",
       sortOrder: "0",
@@ -73,6 +76,7 @@ export default function PagesPage() {
       title: p.title,
       slug: p.slug,
       content: p.content || "",
+      customCss: p.customCss || "",
       metaTitle: p.metaTitle || "",
       metaDesc: p.metaDesc || "",
       sortOrder: String(p.sortOrder),
@@ -90,6 +94,7 @@ export default function PagesPage() {
         title: form.title,
         slug: form.slug || form.title.replace(/\s+/g, "-").toLowerCase(),
         content: form.content,
+        customCss: form.customCss,
         metaTitle: form.metaTitle || undefined,
         metaDesc: form.metaDesc || undefined,
         sortOrder: parseInt(form.sortOrder) || 0,
@@ -213,6 +218,23 @@ export default function PagesPage() {
                   onChange={(html) => setForm({ ...form, content: html })}
                   placeholder="محتوای صفحه را وارد کنید..."
                   minHeight={350}
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: "var(--v-text)" }}
+                >
+                  CSS سفارشی صفحه
+                </label>
+                <textarea
+                  className="v-input min-h-[120px] font-mono text-left"
+                  dir="ltr"
+                  value={form.customCss}
+                  onChange={(e) =>
+                    setForm({ ...form, customCss: e.target.value })
+                  }
+                  placeholder=".page-content { line-height: 2; }"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">

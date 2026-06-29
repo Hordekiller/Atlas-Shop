@@ -6,6 +6,28 @@ import {
 import { PrismaService } from "../../common/prisma.service";
 const sanitizeHtml = require("sanitize-html");
 
+function isEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (typeof a !== typeof b) return false;
+  if (typeof a === "object") {
+    if (Array.isArray(a)) {
+      if (!Array.isArray(b) || a.length !== b.length) return false;
+      return a.every((val, i) => isEqual(val, (b as unknown[])[i]));
+    }
+    const keysA = Object.keys(a as Record<string, unknown>);
+    const keysB = Object.keys(b as Record<string, unknown>);
+    if (keysA.length !== keysB.length) return false;
+    return keysA.every((key) =>
+      isEqual(
+        (a as Record<string, unknown>)[key],
+        (b as Record<string, unknown>)[key],
+      ),
+    );
+  }
+  return a === b;
+}
+
 @Injectable()
 export class PagesService {
   constructor(private prisma: PrismaService) {}
@@ -56,9 +78,10 @@ export class PagesService {
     slug: string;
     type?: string;
     status?: string;
-    content?: string;
-    contentJson?: string;
-    metaTitle?: string;
+  content?: string;
+  contentJson?: string;
+  customCss?: string;
+  metaTitle?: string;
     metaDesc?: string;
     isActive?: boolean;
     sortOrder?: number;
@@ -67,6 +90,9 @@ export class PagesService {
   }) {
     if (data.contentJson) {
       data.contentJson = this.validateContentJson(data.contentJson);
+    }
+    if (data.customCss) {
+      data.customCss = this.sanitizeCustomCss(data.customCss);
     }
     const { publishAt, unpublishAt, ...rest } = data;
     return this.prisma.page.create({
@@ -90,6 +116,7 @@ export class PagesService {
       status?: string;
       content?: string;
       contentJson?: string;
+      customCss?: string;
       metaTitle?: string;
       metaDesc?: string;
       isActive?: boolean;
@@ -103,13 +130,18 @@ export class PagesService {
     if (data.contentJson) {
       data.contentJson = this.validateContentJson(data.contentJson);
     }
+    if (data.customCss !== undefined) {
+      data.customCss = this.sanitizeCustomCss(data.customCss || "");
+    }
     // Auto-save revision before updating
-    if (data.contentJson && data.contentJson !== page.contentJson) {
+    const contentChanged =
+      data.contentJson && !isEqual(data.contentJson, page.contentJson);
+    if (contentChanged) {
       try {
         await this.saveRevision(
           id,
           page.title,
-          data.contentJson,
+          JSON.stringify(page.contentJson || { schema_version: 1, sections: [] }),
           authorId,
           "ویرایش خودکار",
         );
@@ -165,12 +197,13 @@ export class PagesService {
     });
     if (!revision) throw new NotFoundException("نسخه یافت نشد");
     // Save current state as a revision before restoring
-    if (page.contentJson && JSON.stringify(page.contentJson) !== revision.contentJson) {
+    const currentContent = JSON.stringify(page.contentJson);
+    if (currentContent !== revision.contentJson) {
       try {
         await this.saveRevision(
           pageId,
           page.title,
-          page.contentJson as string,
+          JSON.stringify(page.contentJson),
           revision.authorId ?? undefined,
           "بازگردانی خودکار",
         );
@@ -180,8 +213,28 @@ export class PagesService {
     }
     return this.prisma.page.update({
       where: { id: pageId },
-      data: { contentJson: revision.contentJson },
+      data: { contentJson: JSON.parse(revision.contentJson) },
     });
+  }
+
+  private sanitizeCustomCss(css: string) {
+    if (!css) return "";
+    if (css.length > 20_000) {
+      throw new BadRequestException("customCss: حداکثر 20000 کاراکتر مجاز است");
+    }
+    const blockedPatterns = [
+      /<\/?style/i,
+      /<\/?script/i,
+      /javascript:/i,
+      /expression\s*\(/i,
+      /behavior\s*:/i,
+      /@import/i,
+      /url\s*\(\s*['"]?\s*javascript:/i,
+    ];
+    if (blockedPatterns.some((pattern) => pattern.test(css))) {
+      throw new BadRequestException("customCss: شامل CSS ناامن است");
+    }
+    return css;
   }
 
   private validateContentJson(json: string): any {

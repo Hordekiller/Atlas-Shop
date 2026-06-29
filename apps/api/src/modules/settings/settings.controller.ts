@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, UseGuards } from "@nestjs/common";
+import { Controller, Get, Put, Body, UseGuards, Header } from "@nestjs/common";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { SettingsService } from "./settings.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -31,7 +31,19 @@ export class SettingsController {
       footer_config: all.footer_config || null,
       header_config: all.header_config || null,
       global_colors: all.global_colors || null,
+      taxPercent: Number(all.tax_percent || 0),
+      minOrderAmount: Number(all.min_order_amount || 0),
+      maintenanceMode: all.maintenance_mode === "true",
+      maintenanceMessage: all.maintenance_message || "",
     };
+  }
+
+  @Get("robots.txt")
+  @Header("Content-Type", "text/plain")
+  @ApiOperation({ summary: "Get configured robots.txt content" })
+  async robotsTxt() {
+    const all = await this.settingsService.getAll();
+    return all.robots_txt || "User-agent: *\nAllow: /\n";
   }
 
   @Put()

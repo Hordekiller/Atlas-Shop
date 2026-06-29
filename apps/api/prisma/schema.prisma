@@ -703,6 +703,10 @@ model ShopSettings {
   walletBonusPercent Float  @default(0)
   walletBonusFromDate DateTime? @db.Timestamptz
   walletBonusToDate   DateTime? @db.Timestamptz
+  maintenanceMode    Boolean  @default(false)
+  maintenanceMessage String?
+  cacheEnabled       Boolean  @default(true)
+  robotsTxt          String?
   updatedAt        DateTime @updatedAt @db.Timestamptz
 }
 
@@ -758,6 +762,7 @@ model Page {
   status      PageStatus @default(DRAFT)
   content     String?
   contentJson Json?
+  customCss   String?
   metaTitle   String?
   metaDesc    String?
   isActive    Boolean    @default(true)

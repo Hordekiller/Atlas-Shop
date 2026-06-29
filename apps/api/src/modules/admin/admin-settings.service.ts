@@ -52,6 +52,10 @@ export class AdminSettingsService {
       walletBonusPercent: number;
       walletBonusFromDate: Date;
       walletBonusToDate: Date;
+      maintenanceMode: boolean;
+      maintenanceMessage: string;
+      cacheEnabled: boolean;
+      robotsTxt: string;
     }>,
     adminId?: number,
   ) {

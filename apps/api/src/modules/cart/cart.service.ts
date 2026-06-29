@@ -9,6 +9,31 @@ import { PrismaService } from "../../common/prisma.service";
 export class CartService {
   constructor(private prisma: PrismaService) {}
 
+  private getVariant(
+    variantMap: Map<number, unknown>,
+    variantId: number,
+  ):
+    | {
+        id: number;
+        name: string;
+        price: any;
+        stock: number;
+        images: unknown;
+      }
+    | undefined {
+    return variantId > 0
+      ? (variantMap.get(variantId) as
+          | {
+              id: number;
+              name: string;
+              price: any;
+              stock: number;
+              images: unknown;
+            }
+          | undefined)
+      : undefined;
+  }
+
   async findAll(userId: number) {
     const items = await this.prisma.cartItem.findMany({
       where: { userId },
@@ -51,15 +76,17 @@ export class CartService {
             },
           })
         : [];
-    const variantMap = new Map(variants.map((v) => [v.id, v]));
+    const variantMap = new Map<number, unknown>(
+      variants.map((v) => [v.id, v]),
+    );
 
     const now = new Date();
 
     return items.map((item) => {
-      let images: string[] = [];
-      images = Array.isArray(item.product.images) ? item.product.images as unknown as string[] : [];
-      const variant =
-        item.variantId > 0 ? variantMap.get(item.variantId) : undefined;
+      const images = Array.isArray(item.product.images)
+        ? (item.product.images as unknown as string[])
+        : [];
+      const variant = this.getVariant(variantMap, item.variantId);
 
       const variantImages: string[] = [];
       if (Array.isArray(variant?.images)) {
@@ -271,14 +298,16 @@ export class CartService {
             },
           })
         : [];
-    const variantMap = new Map(variants.map((v) => [v.id, v]));
+    const variantMap = new Map<number, unknown>(
+      variants.map((v) => [v.id, v]),
+    );
 
     const now = new Date();
     return items.map((item) => {
-      let images: string[] = [];
-      images = Array.isArray(item.product.images) ? item.product.images as unknown as string[] : [];
-      const variant =
-        item.variantId > 0 ? variantMap.get(item.variantId) : undefined;
+      const images = Array.isArray(item.product.images)
+        ? (item.product.images as unknown as string[])
+        : [];
+      const variant = this.getVariant(variantMap, item.variantId);
       const variantImages: string[] = [];
       if (Array.isArray(variant?.images)) {
         variantImages.push(...(variant.images as unknown as string[]));

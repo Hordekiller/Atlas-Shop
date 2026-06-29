@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { APP_GUARD } from "@nestjs/core";
 import { ConfigModule } from "./common/config.module";
@@ -40,6 +40,7 @@ import { StockAlertsModule } from "./modules/stock-alerts/stock-alerts.module";
 import { InvoiceModule } from "./modules/invoices/invoice.module";
 import { ReturnsModule } from "./modules/returns/returns.module";
 import { NotificationTemplatesModule } from "./modules/notification-templates/notification-templates.module";
+import { MaintenanceMiddleware } from "./common/maintenance.middleware";
 
 @Module({
   imports: [
@@ -94,6 +95,11 @@ import { NotificationTemplatesModule } from "./modules/notification-templates/no
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    MaintenanceMiddleware,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(MaintenanceMiddleware).forRoutes("*");
+  }
+}

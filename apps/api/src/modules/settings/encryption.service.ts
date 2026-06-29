@@ -7,8 +7,10 @@ export class EncryptionService {
   private key: Buffer;
 
   constructor() {
-    const secret =
-      process.env.ENCRYPTION_KEY || "atlas-shop-dev-encryption-key-32chars!!";
+    const secret = process.env.ENCRYPTION_KEY;
+    if (!secret) {
+      throw new Error("ENCRYPTION_KEY is not configured");
+    }
     this.key = crypto.scryptSync(secret, "atlas-salt", 32);
   }
 

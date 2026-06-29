@@ -7,6 +7,8 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { join } from "path";
 import helmet from "helmet";
 import { AppModule } from "./app.module";
+import { AUTH_COOKIE_NAME } from "./common/auth-cookie";
+import { PrismaService } from "./common/prisma.service";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -21,6 +23,20 @@ async function bootstrap() {
 
   app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
+  app.use((req: any, _res, next) => {
+    const cookies = String(req.headers.cookie || "")
+      .split(";")
+      .map((part) => part.trim());
+    const authCookie = cookies.find((part) =>
+      part.startsWith(`${AUTH_COOKIE_NAME}=`),
+    );
+    if (authCookie && !req.headers.authorization) {
+      const token = decodeURIComponent(authCookie.split("=").slice(1).join("="));
+      req.headers.authorization = `Bearer ${token}`;
+    }
+    next();
+  });
+
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(",") || [
       "http://localhost:3000",
@@ -29,7 +45,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.useGlobalInterceptors(new CacheInterceptor());
+  app.useGlobalInterceptors(new CacheInterceptor(app.get(PrismaService)));
 
   app.useGlobalPipes(
     new ValidationPipe({

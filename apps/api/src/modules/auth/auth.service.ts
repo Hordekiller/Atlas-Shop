@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  InternalServerErrorException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
@@ -165,7 +166,7 @@ export class AuthService {
           name,
           email: `user_${phone}@temp.com`,
           phone,
-          password: await bcrypt.hash(phone + process.env.JWT_SECRET, 12),
+          password: await bcrypt.hash(phone + this.getJwtSecret(), 12),
           role: "CUSTOMER",
         },
       });
@@ -197,6 +198,13 @@ export class AuthService {
 
   private generateToken(userId: number, role: string) {
     return this.jwtService.sign({ sub: userId, role });
+  }
+
+  private getJwtSecret() {
+    if (!process.env.JWT_SECRET) {
+      throw new InternalServerErrorException("JWT_SECRET is not configured");
+    }
+    return process.env.JWT_SECRET;
   }
 
   async updateProfile(

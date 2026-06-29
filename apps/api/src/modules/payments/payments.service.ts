@@ -2,18 +2,20 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  ServiceUnavailableException,
 } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma.service";
-
-const ZARINPAL_MERCHANT_ID =
-  process.env.ZARINPAL_MERCHANT_ID || "00000000-0000-0000-0000-000000000000";
+import { EncryptionService } from "../settings/encryption.service";
 const ZARINPAL_API = "https://api.zarinpal.com/pg/v4";
 
 @Injectable()
 export class PaymentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private encryption: EncryptionService,
+  ) {}
 
-  async requestPayment(orderId: number, gateway: string) {
+  async requestPayment(orderId: number, gateway = "zarinpal") {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: { payments: true },
@@ -23,18 +25,24 @@ export class PaymentsService {
     if (order.paymentStatus === "PAID")
       throw new BadRequestException("Order already paid");
 
+    const normalizedGateway = gateway.toLowerCase();
+    const availableGateways = await this.getPaymentGateways();
+    if (!availableGateways.some((item) => item.id === normalizedGateway)) {
+      throw new BadRequestException("Unsupported or disabled payment gateway");
+    }
+
     const existingPayment = await this.prisma.payment.findFirst({
-      where: { orderId, status: "PENDING" },
+      where: { orderId, status: "PENDING", gateway: normalizedGateway },
     });
 
     if (existingPayment) {
       return {
         paymentId: existingPayment.id,
         authority: existingPayment.authority,
-        gateway,
+        gateway: normalizedGateway,
         amount: existingPayment.amount,
         paymentUrl: existingPayment.authority
-          ? this.getPaymentUrl(gateway, existingPayment.authority)
+          ? this.getPaymentUrl(normalizedGateway, existingPayment.authority)
           : "#",
       };
     }
@@ -42,19 +50,11 @@ export class PaymentsService {
     let authority: string;
     let paymentUrl: string;
 
-    switch (gateway) {
+    switch (normalizedGateway) {
       case "zarinpal":
         const result = await this.requestZarinpalPayment(order.total.toNumber(), order.id);
         authority = result.authority;
         paymentUrl = result.url;
-        break;
-      case "mellat":
-        authority = "ML-" + Date.now();
-        paymentUrl = `https://mellat.ir/gateway/${authority}`;
-        break;
-      case "saman":
-        authority = "SM-" + Date.now();
-        paymentUrl = `https://saman.ir/pay/${authority}`;
         break;
       default:
         throw new BadRequestException("Unsupported payment gateway");
@@ -65,7 +65,7 @@ export class PaymentsService {
         orderId,
         amount: order.total,
         authority,
-        gateway,
+        gateway: normalizedGateway,
         status: "PENDING",
       },
     });
@@ -73,7 +73,7 @@ export class PaymentsService {
     return {
       paymentId: payment.id,
       authority,
-      gateway,
+      gateway: normalizedGateway,
       amount: order.total,
       paymentUrl,
     };
@@ -98,8 +98,7 @@ export class PaymentsService {
       verified = result.verified;
       refId = result.refId;
     } else {
-      verified = status === "OK";
-      refId = verified ? "REF-" + Date.now() : null;
+      throw new BadRequestException("Unsupported payment gateway");
     }
 
     if (verified) {
@@ -133,92 +132,91 @@ export class PaymentsService {
   }
 
   async getPaymentGateways() {
-    return [
-      { id: "zarinpal", name: "زرین‌پال", icon: "zarinpal.png" },
-      { id: "mellat", name: "بانک ملت", icon: "mellat.png" },
-      { id: "saman", name: "بانک سامان", icon: "saman.png" },
-    ];
+    const merchantId = await this.getZarinpalMerchantId();
+    return merchantId
+      ? [{ id: "zarinpal", name: "زرین‌پال", icon: "zarinpal.png" }]
+      : [];
   }
 
   private getPaymentUrl(gateway: string, authority: string): string {
     switch (gateway) {
       case "zarinpal":
         return `https://www.zarinpal.com/pg/StartPay/${authority}`;
-      case "mellat":
-        return `https://mellat.ir/gateway/${authority}`;
-      case "saman":
-        return `https://saman.ir/pay/${authority}`;
       default:
         return "#";
     }
   }
 
   private async requestZarinpalPayment(amount: number, orderId: number) {
+    const merchantId = await this.getZarinpalMerchantId();
+    if (!merchantId) {
+      throw new ServiceUnavailableException("Zarinpal merchant is not configured");
+    }
+
     const callbackUrl =
       process.env.ZARINPAL_CALLBACK_URL ||
       `http://localhost:8000/api/v1/payments/verify`;
 
-    try {
-      const response = await fetch(`${ZARINPAL_API}/payment/request.json`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          merchant_id: ZARINPAL_MERCHANT_ID,
-          amount: amount,
-          description: `سفارش شماره ${orderId}`,
-          callback_url: callbackUrl,
-        }),
-      });
+    const response = await fetch(`${ZARINPAL_API}/payment/request.json`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        merchant_id: merchantId,
+        amount,
+        description: `سفارش شماره ${orderId}`,
+        callback_url: callbackUrl,
+      }),
+    });
 
-      const data = await response.json();
+    const data = await response.json().catch(() => ({}));
 
-      if (data.data && data.data.authority) {
-        return {
-          authority: data.data.authority,
-          url: `https://www.zarinpal.com/pg/StartPay/${data.data.authority}`,
-        };
-      }
-
-      // Fallback to simulation
-      const auth = "ZP-" + Date.now();
+    if (data.data && data.data.authority) {
       return {
-        authority: auth,
-        url: `https://www.zarinpal.com/pg/StartPay/${auth}`,
-      };
-    } catch {
-      const auth = "ZP-" + Date.now();
-      return {
-        authority: auth,
-        url: `https://www.zarinpal.com/pg/StartPay/${auth}`,
+        authority: data.data.authority,
+        url: `https://www.zarinpal.com/pg/StartPay/${data.data.authority}`,
       };
     }
+
+    throw new ServiceUnavailableException(
+      data.errors?.message || "Zarinpal payment request failed",
+    );
   }
 
   private async verifyZarinpalPayment(authority: string, amount: number) {
-    try {
-      const response = await fetch(`${ZARINPAL_API}/payment/verify.json`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          merchant_id: ZARINPAL_MERCHANT_ID,
-          authority: authority,
-          amount: amount,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.data && data.data.ref_id) {
-        return { verified: true, refId: String(data.data.ref_id) };
-      }
-
-      return { verified: false, refId: null };
-    } catch {
-      // Fallback: accept if authority starts with ZP-
-      if (authority.startsWith("ZP-")) {
-        return { verified: true, refId: "REF-" + Date.now() };
-      }
-      return { verified: false, refId: null };
+    const merchantId = await this.getZarinpalMerchantId();
+    if (!merchantId) {
+      throw new ServiceUnavailableException("Zarinpal merchant is not configured");
     }
+
+    const response = await fetch(`${ZARINPAL_API}/payment/verify.json`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        merchant_id: merchantId,
+        authority,
+        amount,
+      }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (data.data && data.data.ref_id) {
+      return { verified: true, refId: String(data.data.ref_id) };
+    }
+
+    return { verified: false, refId: null };
+  }
+
+  private async getZarinpalMerchantId() {
+    const settings = await this.prisma.shopSettings.findUnique({
+      where: { id: "singleton" },
+      select: { zarinpalMerchant: true },
+    });
+    const fromSettings = this.encryption.decrypt(settings?.zarinpalMerchant || "");
+    const merchantId = fromSettings || process.env.ZARINPAL_MERCHANT_ID || "";
+    if (!merchantId || /^0{8}-0{4}-0{4}-0{4}-0{12}$/.test(merchantId)) {
+      return "";
+    }
+    return merchantId;
   }
 }

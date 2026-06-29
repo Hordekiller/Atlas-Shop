@@ -6,10 +6,13 @@ import {
   Put,
   UseGuards,
   Req,
+  Res,
 } from "@nestjs/common";
+import { Response } from "express";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { clearAuthCookie, setAuthCookie } from "../../common/auth-cookie";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -19,6 +22,7 @@ export class AuthController {
   @Post("register")
   @ApiOperation({ summary: "Register a new user" })
   async register(
+    @Res({ passthrough: true }) response: Response,
     @Body()
     body: {
       name: string;
@@ -53,19 +57,38 @@ export class AuthController {
           addressText: addressText || "",
         }
       : undefined;
-    return this.authService.register({ ...rest, address });
+    const result = await this.authService.register({ ...rest, address });
+    setAuthCookie(response, result.token);
+    return result;
   }
 
   @Post("login")
   @ApiOperation({ summary: "Login with email and password" })
-  async login(@Body() body: { email: string; password: string }) {
-    return this.authService.login(body.email, body.password);
+  async login(
+    @Res({ passthrough: true }) response: Response,
+    @Body() body: { email: string; password: string },
+  ) {
+    const result = await this.authService.login(body.email, body.password);
+    setAuthCookie(response, result.token);
+    return result;
   }
 
   @Post("otp-login")
   @ApiOperation({ summary: "Login with phone and OTP code" })
-  async otpLogin(@Body() body: { phone: string; code: string }) {
-    return this.authService.otpLogin(body.phone, body.code);
+  async otpLogin(
+    @Res({ passthrough: true }) response: Response,
+    @Body() body: { phone: string; code: string },
+  ) {
+    const result = await this.authService.otpLogin(body.phone, body.code);
+    setAuthCookie(response, result.token);
+    return result;
+  }
+
+  @Post("logout")
+  @ApiOperation({ summary: "Clear auth cookie" })
+  async logout(@Res({ passthrough: true }) response: Response) {
+    clearAuthCookie(response);
+    return { message: "Logged out" };
   }
 
   @Get("me")

@@ -71,7 +71,7 @@ export class CreateOrderDto {
 }
 
 export class UpdateOrderStatusDto {
-  @ApiProperty({ example: "processing" })
+  @ApiProperty({ example: "PROCESSING" })
   @IsString()
   status: string;
 

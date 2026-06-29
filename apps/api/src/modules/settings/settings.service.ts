@@ -55,11 +55,22 @@ export class SettingsService {
   }
 
   async getAll(): Promise<Record<string, string>> {
-    const rows = await this.prisma.siteConfig.findMany();
+    const [rows, shopSettings] = await Promise.all([
+      this.prisma.siteConfig.findMany(),
+      this.prisma.shopSettings.findUnique({ where: { id: "singleton" } }),
+    ]);
     const map: Record<string, string> = {};
     for (const row of rows) map[row.key] = row.value;
     for (const key of Object.keys(this.defaults)) {
       if (!map[key]) map[key] = this.defaults[key];
+    }
+    if (shopSettings) {
+      map.tax_percent = String(shopSettings.taxPercent ?? 0);
+      map.min_order_amount = String(shopSettings.minOrderAmount ?? 0);
+      map.maintenance_mode = String(shopSettings.maintenanceMode ?? false);
+      map.maintenance_message = shopSettings.maintenanceMessage || "";
+      map.cache_enabled = String(shopSettings.cacheEnabled ?? true);
+      map.robots_txt = shopSettings.robotsTxt || map.robots_txt || "";
     }
     return map;
   }

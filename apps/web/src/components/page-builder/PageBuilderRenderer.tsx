@@ -138,15 +138,19 @@ interface PageContent {
 export default function PageBuilderRenderer({
   contentJson,
   globalColors: gc,
+  customCss,
 }: {
-  contentJson: string;
+  contentJson: string | PageContent;
   globalColors?: any;
+  customCss?: string | null;
 }) {
   const [content, setContent] = useState<PageContent | null>(null);
 
   useEffect(() => {
     try {
-      setContent(JSON.parse(contentJson));
+      setContent(
+        typeof contentJson === "string" ? JSON.parse(contentJson) : contentJson,
+      );
     } catch {
       setContent(null);
     }
@@ -168,6 +172,7 @@ export default function PageBuilderRenderer({
 
   return (
     <div style={cssVars}>
+      {customCss ? <style dangerouslySetInnerHTML={{ __html: customCss }} /> : null}
       {content.sections.map((section) => (
         <SectionRenderer key={section.id} section={section} />
       ))}

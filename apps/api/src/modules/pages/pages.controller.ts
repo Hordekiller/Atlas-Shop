@@ -64,6 +64,7 @@ export class PagesController {
       status?: string;
       content?: string;
       contentJson?: string;
+      customCss?: string;
       metaTitle?: string;
       metaDesc?: string;
       isActive?: boolean;

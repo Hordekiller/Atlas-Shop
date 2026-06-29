@@ -9,6 +9,7 @@ import { CouponsService } from "../coupons/coupons.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import { EmailService } from "../email/email.service";
 import { CreateOrderDto, UpdateOrderStatusDto } from "./dto/create-order.dto";
+import { ShippingService } from "../shipping/shipping.service";
 
 @Injectable()
 export class OrdersService {
@@ -17,6 +18,7 @@ export class OrdersService {
     private couponsService: CouponsService,
     private notificationsService: NotificationsService,
     private emailService: EmailService,
+    private shippingService: ShippingService,
   ) {}
 
   async create(userId: number, dto: CreateOrderDto) {
@@ -95,7 +97,9 @@ export class OrdersService {
 
     if (dto.couponCode) {
       const orderProductIds = dto.items.map((i) => i.productId);
-      const orderCategoryIds = [...new Set(products.map((p) => p.categoryId))];
+      const orderCategoryIds = [
+        ...new Set(products.map((p) => p.categoryId).filter(Boolean)),
+      ] as number[];
       const result = await this.couponsService.validate(
         dto.couponCode,
         subtotal,
@@ -107,16 +111,22 @@ export class OrdersService {
       couponId = result.couponId;
     }
 
-    const shippingCost = dto.shippingMethod
-      ? await this.calculateShipping(dto.shippingMethod, subtotal)
-      : 0;
-
-    // Read tax percent from ShopSettings
-    let taxPercent = 0;
     const shopSettings = await this.prisma.shopSettings.findUnique({
       where: { id: "singleton" },
     });
-    if (shopSettings) taxPercent = shopSettings.taxPercent || 0;
+    const minOrderAmount = shopSettings?.minOrderAmount?.toNumber() || 0;
+    if (minOrderAmount > 0 && subtotal - discount < minOrderAmount) {
+      throw new BadRequestException(
+        `حداقل مبلغ سفارش ${minOrderAmount.toLocaleString()} تومان است`,
+      );
+    }
+
+    const shippingCost = dto.shippingMethod
+      ? (await this.shippingService.calculate(dto.shippingMethod, subtotal))
+          .totalCost
+      : 0;
+
+    const taxPercent = shopSettings?.taxPercent || 0;
     const tax = Math.round((subtotal * taxPercent) / 100);
 
     const total = subtotal + shippingCost + tax - discount;
@@ -169,7 +179,7 @@ export class OrdersService {
         await tx.stockMovement.create({
           data: {
             type: "OUT",
-            quantity: -item.quantity,
+            quantity: item.quantity,
             reason: "فروش",
             stockAfter: product.stock - item.quantity,
             productId: item.productId,
@@ -185,15 +195,15 @@ export class OrdersService {
           where: { userId },
           data: { balance: { decrement: walletAmount } },
         });
+        const wallet = await tx.wallet.findUnique({ where: { userId } });
         await tx.walletTransaction.create({
           data: {
-            walletId: (await tx.wallet.findUnique({ where: { userId } }))!.id,
+            walletId: wallet!.id,
             amount: -walletAmount,
             type: "PAYMENT",
             description: "پرداخت سفارش",
             refType: "order",
-            balanceAfter:
-              (await tx.wallet.findUnique({ where: { userId } }))!.balance.minus(walletAmount),
+            balanceAfter: wallet!.balance,
           },
         });
       }
@@ -344,30 +354,30 @@ export class OrdersService {
   }
 
   private static readonly VALID_TRANSITIONS: Record<string, string[]> = {
-    pending: ["confirmed", "cancelled"],
-    confirmed: ["processing", "cancelled"],
-    processing: ["shipped", "cancelled"],
-    shipped: ["delivered", "returned"],
-    delivered: ["returned"],
-    cancelled: [],
-    returned: [],
+    PENDING: ["CONFIRMED", "CANCELLED"],
+    CONFIRMED: ["PROCESSING", "CANCELLED"],
+    PROCESSING: ["SHIPPED", "CANCELLED"],
+    SHIPPED: ["DELIVERED"],
+    DELIVERED: [],
+    CANCELLED: [],
   };
 
   async updateStatus(id: number, dto: UpdateOrderStatusDto, userId?: number) {
     const order = await this.findById(id);
+    const nextStatus = dto.status.toUpperCase();
 
-    if (order.status === dto.status) return order;
+    if (order.status === nextStatus) return order;
 
     const allowed = OrdersService.VALID_TRANSITIONS[order.status];
-    if (!allowed || !allowed.includes(dto.status)) {
+    if (!allowed || !allowed.includes(nextStatus)) {
       throw new BadRequestException(
-        `Cannot change status from "${order.status}" to "${dto.status}". Allowed: ${allowed?.join(", ") || "none"}`,
+        `Cannot change status from "${order.status}" to "${nextStatus}". Allowed: ${allowed?.join(", ") || "none"}`,
       );
     }
 
     // Restore stock on cancellation or return
     if (
-      (dto.status === "CANCELLED" || dto.status === "returned") &&
+      nextStatus === "CANCELLED" &&
       order.status !== "CANCELLED"
     ) {
       for (const item of order.items) {
@@ -385,7 +395,7 @@ export class OrdersService {
           data: {
             type: "IN",
             quantity: item.quantity,
-            reason: dto.status === "CANCELLED" ? "لغو سفارش" : "مرجوعی",
+            reason: "لغو سفارش",
             stockAfter: (await this.prisma.product.findUnique({
               where: { id: item.productId },
               select: { stock: true },
@@ -399,13 +409,13 @@ export class OrdersService {
       }
     }
 
-    const updateData: any = { status: dto.status };
+    const updateData: any = { status: nextStatus };
 
     if (dto.trackingCode) {
       updateData.trackingCode = dto.trackingCode;
     }
 
-    if (dto.status === "delivered") {
+    if (nextStatus === "DELIVERED") {
       updateData.deliveredAt = new Date();
     }
 
@@ -420,20 +430,20 @@ export class OrdersService {
     });
     if (orderUser) {
       const statusMessages: Record<string, string> = {
-        confirmed: "سفارش شما تأیید شد ✅",
-        processing: "سفارش شما در حال پردازش است 📦",
-        shipped: "سفارش شما ارسال شد 🚚",
-        delivered: "سفارش شما تحویل داده شد 🎉",
-        cancelled: "سفارش شما لغو شد ❌",
-        returned: "سفارش شما مرجوع شد ↩️",
+        CONFIRMED: "سفارش شما تأیید شد ✅",
+        PROCESSING: "سفارش شما در حال پردازش است 📦",
+        SHIPPED: "سفارش شما ارسال شد 🚚",
+        DELIVERED: "سفارش شما تحویل داده شد 🎉",
+        CANCELLED: "سفارش شما لغو شد ❌",
       };
       const notifTitle =
-        statusMessages[dto.status] || `وضعیت سفارش به ${dto.status} تغییر کرد`;
+        statusMessages[nextStatus] ||
+        `وضعیت سفارش به ${nextStatus} تغییر کرد`;
       const statusLabel =
-        statusMessages[dto.status]?.replace(/[✅❌↩️🔔]/g, "").trim() ||
-        dto.status;
+        statusMessages[nextStatus]?.replace(/[✅❌↩️🔔]/g, "").trim() ||
+        nextStatus;
       const notifType =
-        dto.status === "cancelled" ? "order_cancelled" : "order_status_change";
+        nextStatus === "CANCELLED" ? "order_cancelled" : "order_status_change";
       await this.notificationsService.create(
         order.userId,
         notifType,
@@ -442,18 +452,18 @@ export class OrdersService {
         `/orders/${order.id}`,
         {
           orderNumber: order.orderNumber,
-          status: dto.status,
+          status: nextStatus,
           statusLabel,
           amount: order.total.toNumber(),
           userName: orderUser?.name || "",
         },
       );
-      if (orderUser.email && dto.status !== "pending") {
+      if (orderUser.email && nextStatus !== "PENDING") {
         this.emailService
           .sendOrderStatusUpdate(
             orderUser.email,
             order.orderNumber,
-            dto.status,
+            nextStatus,
             orderUser.name,
           )
           .catch(() => {});
@@ -465,32 +475,15 @@ export class OrdersService {
 
   async cancel(id: number, userId: number) {
     const order = await this.findById(id, userId);
-    const cancellable = ["pending", "confirmed"];
+    const cancellable = ["PENDING", "CONFIRMED"];
     if (!cancellable.includes(order.status)) {
       throw new BadRequestException("Order cannot be cancelled at this stage");
     }
-    return this.updateStatus(id, { status: "cancelled" }, userId);
+    return this.updateStatus(id, { status: "CANCELLED" }, userId);
   }
 
   async getUserOrders(userId: number, page = 1, limit = 20) {
     return this.findAll({ userId, page, limit });
   }
 
-  private async calculateShipping(
-    method: string,
-    subtotal: number,
-  ): Promise<number> {
-    const rates: Record<string, number> = {
-      post_pishtaz: 150000,
-      post_sefareshi: 80000,
-      tipax: 200000,
-      mahax: 180000,
-      snapp_box: 120000,
-    };
-
-    const freeShippingThreshold = 5000000;
-    if (subtotal >= freeShippingThreshold) return 0;
-
-    return rates[method] || 0;
-  }
 }

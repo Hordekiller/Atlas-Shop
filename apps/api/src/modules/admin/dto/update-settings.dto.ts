@@ -5,6 +5,7 @@ import {
   IsDateString,
   Min,
   Max,
+  IsBoolean,
 } from "class-validator";
 import { ApiPropertyOptional } from "@nestjs/swagger";
 
@@ -118,4 +119,24 @@ export class UpdateSettingsDto {
   @IsDateString()
   @ApiPropertyOptional()
   walletBonusToDate?: Date;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional()
+  maintenanceMode?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  maintenanceMessage?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional()
+  cacheEnabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  robotsTxt?: string;
 }

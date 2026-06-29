@@ -244,7 +244,8 @@ interface PageItem {
   slug: string;
   type: string;
   status: string;
-  contentJson?: string;
+  contentJson?: string | { sections?: any[] };
+  customCss?: string;
   content?: string;
   metaTitle?: string;
   metaDesc?: string;
@@ -268,6 +269,14 @@ const pageTypeIcons: Record<string, string> = {
   custom: "tabler:file",
 };
 
+function parsePageSections(contentJson: PageItem["contentJson"]) {
+  if (!contentJson) return [];
+  if (typeof contentJson === "string") {
+    return JSON.parse(contentJson).sections || [];
+  }
+  return contentJson.sections || [];
+}
+
 export default function PageBuilder() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -288,6 +297,7 @@ export default function PageBuilder() {
     status: "draft",
     metaTitle: "",
     metaDesc: "",
+    customCss: "",
   });
   const [sections, setSections] = useState<any[]>([]);
   const sectionsRef = useRef(sections);
@@ -362,6 +372,7 @@ export default function PageBuilder() {
         status: "draft",
         metaTitle: "",
         metaDesc: "",
+        customCss: "",
       });
       setSections([createDefaultSection()]);
       setPast([]);
@@ -380,10 +391,11 @@ export default function PageBuilder() {
             status: p.status,
             metaTitle: p.metaTitle || "",
             metaDesc: p.metaDesc || "",
+            customCss: p.customCss || "",
           });
           if (p.contentJson) {
             try {
-              const s = JSON.parse(p.contentJson).sections || [];
+              const s = parsePageSections(p.contentJson);
               setSections(s);
               setPast([]);
               setFuture([]);
@@ -2111,6 +2123,28 @@ export default function PageBuilder() {
                 className="text-xs font-bold"
                 style={{ color: "var(--v-text-secondary)" }}
               >
+                CSS سفارشی
+              </p>
+              <div>
+                <label className="v-label">CSS سفارشی صفحه</label>
+                <textarea
+                  value={pageForm.customCss}
+                  onChange={(e) =>
+                    setPageForm({ ...pageForm, customCss: e.target.value })
+                  }
+                  className="v-input min-h-[140px] font-mono text-left"
+                  dir="ltr"
+                  placeholder=".my-section { margin-top: 24px; }"
+                />
+                <p className="text-xs mt-1" style={{ color: "var(--v-text-secondary)" }}>
+                  از script، @import و javascript: استفاده نکنید.
+                </p>
+              </div>
+              <div className="border-t my-2" />
+              <p
+                className="text-xs font-bold"
+                style={{ color: "var(--v-text-secondary)" }}
+              >
                 سئو (SEO)
               </p>
               <div>
@@ -2225,8 +2259,7 @@ export default function PageBuilder() {
                             const p = await api.get<any>(`/pages/${editId}`);
                             if (p.contentJson) {
                               try {
-                                const s =
-                                  JSON.parse(p.contentJson).sections || [];
+                                const s = parsePageSections(p.contentJson);
                                 setSections(s);
                                 setPast([]);
                                 setFuture([]);

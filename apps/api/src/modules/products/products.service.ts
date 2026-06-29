@@ -5,8 +5,11 @@ import {
   ConflictException,
 } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma.service";
+import {
+  ProductStatus,
+  ProductPublishStatus,
+} from "@prisma/client";
 import { CreateProductDto, UpdateProductDto } from "./dto/create-product.dto";
-import { ProductPublishStatus, ProductStatus } from "@prisma/client";
 
 @Injectable()
 export class ProductsService {
@@ -753,7 +756,9 @@ export class ProductsService {
           salePrice: p.salePrice ? Number(p.salePrice) : undefined,
           stock: Number(p.stock) || 0,
           categoryId: category?.id || 1,
-          status: p.status ? (p.status.toUpperCase() as ProductStatus) : ProductStatus.IN_STOCK,
+          status: p.status
+            ? (p.status.toUpperCase() as ProductStatus)
+            : ProductStatus.IN_STOCK,
           isActive: p.isActive !== undefined ? Boolean(p.isActive) : true,
           tags: p.tags
             ? String(p.tags)
