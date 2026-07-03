@@ -1,8 +1,8 @@
-<div dir="rtl" align="center">
+<div align="center">
 
-# 🛍️ فروشگاه اطلس — Atlas Shop
+# 🛍️ Atlas Shop
 
-**پلتفرم فروشگاهی مدرن و کامل | NestJS + Next.js + Turborepo**
+**A Modern, Full-Featured E-Commerce Platform | NestJS + Next.js + Turborepo**
 
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Hordekiller/shop-sor/ci.yml?style=for-the-badge&label=CI)
 ![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?style=for-the-badge&logo=nestjs)
@@ -16,106 +16,100 @@
 
 ---
 
-🚀 **فروشگاه اطلس** یک پلتفرم فروشگاهی فول‌استک، کاملاً فارسی و مشابه ووکامرس ایرانیزه است که با آخرین تکنولوژی‌های وب ساخته شده. از مدیریت محصولات و سفارشات گرفته تا درگاه‌های پرداخت ایرانی و پنل فروشنده — همه چیز در یک مونورپوی حرفه‌ای.
+🚀 **Atlas Shop** is a full-stack, Persian-first e-commerce platform — comparable to a localized WooCommerce — built with a modern web stack. From product and order management to Iranian payment gateways and a full vendor panel, everything lives in one professionally structured monorepo.
 
 </div>
 
 ---
 
-## ✨ قابلیت‌ها
+## ✨ Features
 
-<div dir="rtl">
+### 🏪 Storefront (Customer-Facing)
 
-### 🏪 فروشگاه (مشتری)
+- **Homepage** — banner display, featured products, category showcase
+- **Product listing** — search, filter by category and price, sorting, pagination
+- **Product details** — image gallery, pricing, user reviews, add to cart
+- **Shopping cart** — localStorage-based cart management, quantity updates, item removal
+- **Checkout** — shipping method selection, discount code application, payment gateway selection
+- **User profile** — edit personal info, view order history
+- **Authentication** — login / register via JWT
 
-- **صفحه اصلی** — نمایش بنر، محصولات ویژه، دسته‌بندی‌ها
-- **صفحه محصولات** — جستجو، فیلتر بر اساس دسته و قیمت، مرتب‌سازی و صفحه‌بندی
-- **جزئیات محصول** — تصاویر، قیمت، نظرات کاربران، افزودن به سبد خرید
-- **سبد خرید** — مدیریت مبتنی بر localStorage، تغییر تعداد، حذف
-- **تسویه حساب** — انتخاب روش ارسال، اعمال کد تخفیف، انتخاب درگاه پرداخت
-- **پروفایل کاربری** — ویرایش اطلاعات شخصی، تاریخچه سفارشات
-- **احراز هویت** — ورود / ثبت‌نام با JWT
+### 👑 Admin Panel
 
-### 👑 پنل مدیریت
+- **Dashboard** — live stats for sales, orders, users, and products
+- **Product management** — full CRUD with image upload, pricing, categorization
+- **Category management** — hierarchical categories (parent/child)
+- **Order management** — view orders, update status (confirmed/shipped/delivered/cancelled), advanced filtering
+- **Discount management** — percentage and fixed-amount coupons with expiration dates
+- **User management** — user listing, details, per-user order history
+- **Vendors** — manage active vendor shops
+- **Reports** — sales and performance analytics
+- **Settings** — store-wide configuration
 
-- **داشبورد** — آمار واقعی فروش، سفارشات، کاربران، محصولات
-- **مدیریت محصولات** — CRUD کامل با آپلود تصویر، قیمت‌گذاری، دسته‌بندی
-- **مدیریت دسته‌بندی‌ها** — سلسله‌مراتب دسته‌بندی (والد/فرزند)
-- **مدیریت سفارشات** — مشاهده، تغییر وضعیت (تأیید/ارسال/تحویل/لغو)، فیلتر پیشرفته
-- **مدیریت تخفیف‌ها** — کوپن‌های درصدی و مبلغی با تاریخ انقضا
-- **مدیریت کاربران** — لیست کاربران، جزئیات، مشاهده سفارشات هر کاربر
-- **فروشندگان** — مدیریت فروشگاه‌های فعال
-- **گزارشات** — آمار فروش و عملکرد
-- **تنظیمات** — تنظیمات فروشگاه
+### 🧑‍💼 Vendor Panel
 
-### 🧑‍💼 پنل فروشنده
+- **Vendor dashboard** — stats for the vendor's own shop (products, orders, revenue)
+- **My products** — manage the vendor's own product listings
+- **My orders** — view orders related to the vendor's products
 
-- **داشبورد فروشنده** — آمار فروشگاه شخصی (محصولات، سفارشات، درآمد)
-- **محصولات من** — مدیریت محصولات فروشگاه خود
-- **سفارشات من** — مشاهده سفارشات مربوط به محصولات خود
+### 💳 Payment Gateways
 
-### 💳 درگاه‌های پرداخت
+- **Zarinpal** — fully integrated via API v4
+- **Bank Mellat** — simulated (ready for live integration)
+- **Bank Saman** — simulated (ready for live integration)
 
-- **زرین‌پال** — یکپارچه‌سازی واقعی با API v4
-- **بانک ملت** — شبیه‌سازی شده (قابل اتصال واقعی)
-- **بانک سامان** — شبیه‌سازی شده (قابل اتصال واقعی)
+### 📦 Shipping Methods
 
-### 📦 روش‌های ارسال
+- Iran Post (Express / Custom)
+- Tipax
+- Mahex
+- SnappBox
 
-- پست پیشتاز / سفارشی
-- تیپاکس
-- ماهکس
-- اسنپ‌باکس
+### 🌐 Full Localization
 
-### 🌐 فارسی‌سازی کامل
-
-- **RTL** — پشتیبانی کامل از راست‌به‌چپ
-- **تاریخ شمسی** — با کتابخانه `date-fns-jalali`
-- **اعداد فارسی** — نمایش اعداد به صورت فارسی
-- **UI کاملاً فارسی** — تمام رابط‌های کاربری به زبان فارسی
+- **RTL** — complete right-to-left layout support
+- **Jalali calendar** — powered by `date-fns-jalali`
+- **Persian numerals** — numbers displayed in Persian format
+- **Fully localized UI** — entire interface in Persian
 
 ### 🐳 Docker
 
-- **Dockerfile** مجزا برای API، فروشگاه و پنل ادمین
-- **docker-compose.yml** با Nginx reverse proxy
-- آماده استقرار در تولید
+- Dedicated **Dockerfile** for API, storefront, and admin panel
+- **docker-compose.yml** with Nginx reverse proxy
+- Production-deployment ready
 
 ### 🔄 CI/CD
 
-- **GitHub Actions** — lint + build + smoke test خودکار
-
-</div>
+- **GitHub Actions** — automated lint + build + smoke tests
 
 ---
 
-## 🏗️ معماری
-
-<div dir="rtl">
+## 🏗️ Architecture
 
 ```
 atlas-shop/
 ├── apps/
-│   ├── api/          # NestJS API — پورت ۸۰۰۰
-│   ├── web/          # فروشگاه (Next.js) — پورت ۳۰۰۰
-│   └── admin/        # پنل مدیریت (Next.js) — پورت ۳۰۰۱
+│   ├── api/          # NestJS API — port 8000
+│   ├── web/           # Storefront (Next.js) — port 3000
+│   └── admin/         # Admin panel (Next.js) — port 3001
 ├── packages/
-│   ├── shared-types/ # تایپ‌های مشترک TypeScript
-│   ├── api-client/   # کلاینت API خودکار
-│   └── eslint-config/ # تنظیمات ESLint مشترک
+│   ├── shared-types/  # Shared TypeScript types
+│   ├── api-client/    # Auto-generated API client
+│   └── eslint-config/ # Shared ESLint configuration
 ├── docker-compose.yml
 ├── nginx/
 │   └── nginx.conf
-└── turbo.json        # تنظیمات Turborepo
+└── turbo.json         # Turborepo configuration
 ```
 
-### دیاگرام معماری
+### Architecture Diagram
 
 ```
-🌐 کاربر
+🌐 User
    │
    ▼
 ┌──────────────────────────────────────────────────┐
-│                  Nginx (پورت ۸۰)                   │
+│                  Nginx (port 80)                   │
 │   / → web:3000  /admin/* → admin:3001  /api → api │
 └──────────────────────────────────────────────────┘
    │           │            │
@@ -132,291 +126,241 @@ atlas-shop/
                      └──────────────┘
 ```
 
-</div>
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+| --- | --- |
+| **Backend** | NestJS 11, Prisma 5, Passport JWT, Swagger, Multer |
+| **Frontend (storefront)** | Next.js 16, React 19, Tailwind CSS 4 |
+| **Frontend (admin)** | Next.js 16, React 19, Tailwind CSS 4 |
+| **Database** | PostgreSQL 16 |
+| **Monorepo** | Turborepo 2, npm workspaces |
+| **Language** | TypeScript 5 (across the entire stack) |
+| **Authentication** | JWT (bcryptjs) |
+| **API documentation** | Swagger (OpenAPI) |
+| **CI/CD** | GitHub Actions |
+| **Containers** | Docker + docker-compose |
+| **Calendar** | date-fns-jalali |
+| **Payment gateway** | Zarinpal API v4 |
 
 ---
 
-## 🛠️ تکنولوژی‌ها
+## 🚀 Quick Start
 
-<div dir="rtl">
-
-| بخش                    | تکنولوژی                                           |
-| ---------------------- | -------------------------------------------------- |
-| **Backend**            | NestJS 11, Prisma 5, Passport JWT, Swagger, Multer |
-| **Frontend (فروشگاه)** | Next.js 16, React 19, Tailwind CSS 4               |
-| **Frontend (ادمین)**   | Next.js 16, React 19, Tailwind CSS 4               |
-| **دیتابیس**            | PostgreSQL 16                                      |
-| **مونورپو**            | Turborepo 2, npm workspaces                        |
-| **زبان**               | TypeScript 5 (تمامی بخش‌ها)                        |
-| **احراز هویت**         | JWT (bcryptjs)                                     |
-| **مستندات API**        | Swagger (OpenAPI)                                  |
-| **CI/CD**              | GitHub Actions                                     |
-| **Container**          | Docker + docker-compose                            |
-| **تاریخ شمسی**         | date-fns-jalali                                    |
-| **درگاه پرداخت**       | Zarinpal API v4                                    |
-
-</div>
-
----
-
-## 🚀 شروع سریع
-
-### پیش‌نیازها
-
-<div dir="rtl">
+### Prerequisites
 
 - Node.js ≥ 22
 - npm ≥ 10
-- PostgreSQL ≥ 16 (و یک دیتابیس خالی به نام `atlas_shop`)
+- PostgreSQL ≥ 16 (with an empty database named `atlas_shop`)
 
-</div>
-
-### نصب و راه‌اندازی
-
-<div dir="rtl">
+### Installation & Setup
 
 ```bash
-# ۱. کلون کردن پروژه
+# 1. Clone the repository
 git clone https://github.com/Hordekiller/shop-sor.git
 cd "shop sor"
 
-# ۲. تنظیم متغیرهای محیطی
+# 2. Configure environment variables
 cp .env.example apps/api/.env
-# سپس فایل apps/api/.env را ویرایش کنید و مقادیر واقعی را وارد کنید
+# Then edit apps/api/.env with your actual configuration values
 
-# ۳. نصب وابستگی‌ها
+# 3. Install dependencies
 npm install
 
-# ۴. راه‌اندازی دیتابیس (migration)
+# 4. Run database migrations
 npm run db:migrate -w @atlas-shop/api
 npm run db:generate -w @atlas-shop/api
 
-# ۵. پر کردن دیتابیس با داده‌های اولیه
+# 5. Seed the database with initial data
 npm run db:seed -w @atlas-shop/api
 
-# ۶. اجرای همزمان همه سرویس‌ها
+# 6. Run all services concurrently
 npm run dev
 ```
 
-</div>
+### Default Credentials
 
-### دسترسی‌ها
+| Role | Email | Password |
+| --- | --- | --- |
+| **System Admin** | `admin@atlas-shop.com` | `admin123` |
+| **Customer** | Register via the storefront | — |
 
-<div dir="rtl">
+> The first user to register is automatically assigned the **SUPER_ADMIN** role.
 
-| نقش            | ایمیل                  | رمز عبور   |
-| -------------- | ---------------------- | ---------- |
-| **مدیر سیستم** | `admin@atlas-shop.com` | `admin123` |
-| **مشتری**      | ثبت‌نام از طریق سایت   | —          |
+### Local URLs
 
-> اولین کاربر ثبت‌نام‌کننده به صورت خودکار نقش **SUPER_ADMIN** می‌گیرد.
-
-</div>
-
-### لینک‌ها
-
-<div dir="rtl">
-
-| سرویس       | آدرس                           |
-| ----------- | ------------------------------ |
-| فروشگاه     | http://localhost:3000          |
-| پنل مدیریت  | http://localhost:3001          |
-| API         | http://localhost:8000/api/v1   |
-| مستندات API | http://localhost:8000/api/docs |
-
-</div>
+| Service | URL |
+| --- | --- |
+| Storefront | http://localhost:3000 |
+| Admin Panel | http://localhost:3001 |
+| API | http://localhost:8000/api/v1 |
+| API Docs | http://localhost:8000/api/docs |
 
 ---
 
-## 🐳 اجرا با Docker
-
-<div dir="rtl">
+## 🐳 Running with Docker
 
 ```bash
-# استقرار کامل با Docker
+# Full deployment via Docker
 docker compose up -d
 
-# سرویس‌ها:
-#   - Nginx: پورت ۸۰
-#   - API: پورت ۸۰۰۰
-#   - فروشگاه: پورت ۳۰۰۰
-#   - پنل مدیریت: پورت ۳۰۰۱
+# Services:
+#   - Nginx: port 80
+#   - API: port 8000
+#   - Storefront: port 3000
+#   - Admin Panel: port 3001
 ```
 
-### متغیرهای محیطی Docker
+### Docker Environment Variables
 
-| متغیر                   | توضیح                | پیش‌فرض                                        |
-| ----------------------- | -------------------- | ---------------------------------------------- |
-| `JWT_SECRET`            | کلید امضای JWT       | `change-this-secret-in-production`             |
-| `ZARINPAL_MERCHANT_ID`  | شناسه درگاه زرین‌پال | —                                              |
-| `ZARINPAL_CALLBACK_URL` | آدرس بازگشت پرداخت   | `http://localhost:8000/api/v1/payments/verify` |
-
-</div>
+| Variable | Description | Default |
+| --- | --- | --- |
+| `JWT_SECRET` | JWT signing secret | `change-this-secret-in-production` |
+| `ZARINPAL_MERCHANT_ID` | Zarinpal merchant identifier | — |
+| `ZARINPAL_CALLBACK_URL` | Payment callback URL | `http://localhost:8000/api/v1/payments/verify` |
 
 ---
 
-## 📸 اسکرین‌شات‌ها
+## 📸 Screenshots
 
-<div dir="rtl">
+### 🏪 Storefront
+![Storefront](./Screenshots/Atlas%20ScreenShots1.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots3.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots5.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots7.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots9.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots8.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots6.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots14.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots15.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots17.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots30.png)
+![Storefront](./Screenshots/Atlas%20ScreenShots31.png)
 
-### 🏪 فروشگاه
-![فروشگاه](./Screenshots/Atlas%20ScreenShots1.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots3.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots5.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots7.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots9.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots8.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots6.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots14.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots15.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots17.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots30.png)
-![فروشگاه](./Screenshots/Atlas%20ScreenShots31.png)
-
-### 👑 پنل مدیریت
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots2.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots4.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots10.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots11.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots12.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots13.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots16.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots18.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots19.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots20.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots21.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots22.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots23.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots24.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots25.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots26.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots27.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots28.png)
-![پنل مدیریت](./Screenshots/Atlas%20ScreenShots29.png)
-
-</div>
+### 👑 Admin Panel
+![Admin Panel](./Screenshots/Atlas%20ScreenShots2.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots4.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots10.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots11.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots12.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots13.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots16.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots18.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots19.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots20.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots21.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots22.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots23.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots24.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots25.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots26.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots27.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots28.png)
+![Admin Panel](./Screenshots/Atlas%20ScreenShots29.png)
 
 ---
 
-## 📁 ساختار API (مسیرهای اصلی)
-
-<div dir="rtl">
+## 📁 API Structure (Core Routes)
 
 ```
 /api/v1
-├── POST   /auth/register     ثبت‌نام
-├── POST   /auth/login        ورود
-├── GET    /auth/me           اطلاعات کاربر فعلی
-├── PUT    /auth/profile      ویرایش پروفایل
-├── GET    /products          لیست محصولات
-├── GET    /products/:id      جزئیات محصول
-├── POST   /products          ایجاد محصول (ادمین/فروشنده)
-├── PUT    /products/:id      ویرایش محصول (ادمین/فروشنده)
-├── DELETE /products/:id      حذف محصول (ادمین)
-├── GET    /categories        لیست دسته‌بندی‌ها
-├── POST   /orders            ثبت سفارش
-├── GET    /orders            سفارشات من
-├── GET    /orders/:id        جزئیات سفارش
-├── PUT    /orders/:id/status تغییر وضعیت (ادمین)
-├── POST   /payments/request  درخواست پرداخت
-├── GET    /payments/verify   تأیید پرداخت
-├── GET    /admin/stats       آمار داشبورد (ادمین)
-├── GET    /users             لیست کاربران (ادمین)
-├── GET    /users/:id         جزئیات کاربر (ادمین)
-├── GET    /shops/my          فروشگاه من (فروشنده)
-├── POST   /shops             ایجاد فروشگاه (فروشنده)
-├── POST   /upload            آپلود تصویر
-└── ... و بسیاری مسیرهای دیگر
+├── POST   /auth/register     Register
+├── POST   /auth/login        Login
+├── GET    /auth/me           Current user info
+├── PUT    /auth/profile      Update profile
+├── GET    /products          List products
+├── GET    /products/:id      Product details
+├── POST   /products          Create product (admin/vendor)
+├── PUT    /products/:id      Update product (admin/vendor)
+├── DELETE /products/:id      Delete product (admin)
+├── GET    /categories        List categories
+├── POST   /orders            Create order
+├── GET    /orders            My orders
+├── GET    /orders/:id        Order details
+├── PUT    /orders/:id/status Update order status (admin)
+├── POST   /payments/request  Request payment
+├── GET    /payments/verify   Verify payment
+├── GET    /admin/stats       Dashboard stats (admin)
+├── GET    /users             List users (admin)
+├── GET    /users/:id         User details (admin)
+├── GET    /shops/my          My shop (vendor)
+├── POST   /shops             Create shop (vendor)
+├── POST   /upload            Upload image
+└── ... and many more routes
 ```
 
-مستندات کامل Swagger در آدرس `/api/docs` در دسترس است.
-
-</div>
+Full Swagger documentation is available at `/api/docs`.
 
 ---
 
-## 🗺️ نقشه راه
+## 🗺️ Roadmap
 
-<div dir="rtl">
+### ✅ Completed
 
-### ✅ انجام شده
-
-- [x] احراز هویت (JWT) با ثبت‌نام و ورود
-- [x] مدیریت محصولات (CRUD + آپلود تصویر)
-- [x] دسته‌بندی سلسله‌مراتبی
-- [x] سبد خرید و تسویه حساب
-- [x] پنل مدیریت کامل (داشبورد، سفارشات، کاربران، تخفیف‌ها)
-- [x] پنل فروشنده
-- [x] درگاه پرداخت زرین‌پال
-- [x] روش‌های ارسال (پست، تیپاکس، ماهکس، اسنپ‌باکس)
-- [x] تاریخ شمسی و RTL کامل
+- [x] JWT authentication with registration and login
+- [x] Product management (CRUD + image upload)
+- [x] Hierarchical categories
+- [x] Cart and checkout
+- [x] Full admin panel (dashboard, orders, users, discounts)
+- [x] Vendor panel
+- [x] Zarinpal payment gateway
+- [x] Shipping methods (Post, Tipax, Mahex, SnappBox)
+- [x] Jalali calendar and full RTL support
 - [x] Docker + docker-compose
-- [x] CI/CD با GitHub Actions
-- [x] مهاجرت از SQLite به PostgreSQL
+- [x] CI/CD with GitHub Actions
+- [x] Migration from SQLite to PostgreSQL
 
-### 🔜 در دست توسعه
+### 🔜 In Progress
 
-- [ ] سیستم اطلاع‌رسانی (ایمیل، نوتیفیکیشن)
-- [ ] سیستم تخفیف‌های پیشرفته (کد تخفیف هوشمند)
-- [ ] انبارداری و موجودی
-- [ ] برگشت کالا و جریمه
-- [ ] کیف پول کاربران
-- [ ] سیستم ارجاع (Affiliate)
-- [ ] اپلیکیشن PWA
-- [ ] چندفروشندگی کامل
-- [ ] وبلاگ و سئو پیشرفته
-
-</div>
+- [ ] Notification system (email, push notifications)
+- [ ] Advanced discount system (smart discount codes)
+- [ ] Inventory and stock management
+- [ ] Returns and refund handling
+- [ ] User wallet
+- [ ] Affiliate/referral system
+- [ ] PWA support
+- [ ] Full multi-vendor marketplace
+- [ ] Blog and advanced SEO
 
 ---
 
 ## 🧪 CI/CD
 
-<div dir="rtl">
+The project includes **GitHub Actions CI**, which runs on every push and pull request:
 
-پروژه دارای **GitHub Actions CI** است که در هر Push و Pull Request:
-
-1. ✅ وابستگی‌ها را نصب می‌کند
-2. 🔍 ESLint lint را اجرا می‌کند
-3. 🏗️ همه سه اپ (API, Web, Admin) را build می‌کند
-4. 🧪 Smoke test اجرا می‌کند:
-   - ثبت‌نام و ورود کاربر
-   - ایجاد محصول و دسته‌بندی
-   - ثبت سفارش
-   - اعمال تخفیف
-   - درخواست پرداخت
-   - دریافت آمار ادمین
-
-</div>
+1. ✅ Installs dependencies
+2. 🔍 Runs ESLint
+3. 🏗️ Builds all three apps (API, Web, Admin)
+4. 🧪 Runs smoke tests:
+   - User registration and login
+   - Product and category creation
+   - Order placement
+   - Discount application
+   - Payment request
+   - Fetching admin stats
 
 ---
 
-## 🤝 مشارکت
+## 🤝 Contributing
 
-<div dir="rtl">
-
-1. Fork کنید 🍴
-2. یک Branch جدید ایجاد کنید (`git checkout -b feature/amazing`)
-3. Commit کنید (`git commit -m 'feat: add amazing feature'`)
-4. Push کنید (`git push origin feature/amazing`)
-5. Pull Request ایجاد کنید 🎉
-
-</div>
+1. Fork the repository 🍴
+2. Create a new branch (`git checkout -b feature/amazing`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing`)
+5. Open a Pull Request 🎉
 
 ---
 
-## 📜 لایسنس
+## 📜 License
 
-<div dir="rtl">
-
-این پروژه تحت لایسنس **MIT** منتشر شده است. برای اطلاعات بیشتر فایل [LICENSE](./LICENSE) را ببینید.
-
-</div>
+This project is licensed under the **MIT License**. See [LICENSE](./LICENSE) for details.
 
 ---
 
-<div dir="rtl" align="center">
+<div align="center">
 
-ساخته شده با ❤️ در ایران
+Built with ❤️ in Iran
 
 </div>
