@@ -20,6 +20,9 @@
     "db:migrate": "npm run db:migrate -w @atlas-shop/api",
     "db:generate": "npm run db:generate -w @atlas-shop/api"
   },
+  "overrides": {
+    "js-yaml": "4.2.0"
+  },
   "devDependencies": {
     "prettier": "^3.2.0",
     "turbo": "^2.0.0"
