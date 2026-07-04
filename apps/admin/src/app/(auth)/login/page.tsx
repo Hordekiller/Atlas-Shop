@@ -19,13 +19,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { token, user } = await api.post<{ token: string; user: any }>(
+      await api.post<{ token: string; user: any }>(
         "/auth/login",
         { email, password },
       );
-      localStorage.setItem("atlas_token", token);
-      localStorage.setItem("atlas_user", JSON.stringify(user));
-      router.push("/");
+      window.location.href = "/";
     } catch (err: any) {
       setError(err.message || "خطا در ورود");
     } finally {

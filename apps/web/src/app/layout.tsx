@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Providers } from "@/lib/providers";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { WishlistProvider } from "@/context/WishlistContext";
@@ -35,20 +36,22 @@ export default function RootLayout({
         className="pb-14 md:pb-0"
         style={{ background: "var(--dk-bg)", color: "var(--dk-text)" }}
       >
-        <CartProvider>
-          <WalletProvider>
-            <WishlistProvider>
-              <CompareProvider>
-                <ToastProvider>
-                  <FontLoader />
-                  {children}
-                  <MobileBottomNav />
-                  <CompareBar />
-                </ToastProvider>
-              </CompareProvider>
-            </WishlistProvider>
-          </WalletProvider>
-        </CartProvider>
+        <Providers>
+          <CartProvider>
+            <WalletProvider>
+              <WishlistProvider>
+                <CompareProvider>
+                  <ToastProvider>
+                    <FontLoader />
+                    {children}
+                    <MobileBottomNav />
+                    <CompareBar />
+                  </ToastProvider>
+                </CompareProvider>
+              </WishlistProvider>
+            </WalletProvider>
+          </CartProvider>
+        </Providers>
       </body>
     </html>
   );

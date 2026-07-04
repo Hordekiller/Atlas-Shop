@@ -1,5 +1,6 @@
 import "./globals.css";
 import AdminShell from "./admin-shell";
+import { Providers } from "@/lib/providers";
 
 export default function RootLayout({
   children,
@@ -9,7 +10,9 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl">
       <body suppressHydrationWarning>
-        <AdminShell>{children}</AdminShell>
+        <Providers>
+          <AdminShell>{children}</AdminShell>
+        </Providers>
       </body>
     </html>
   );

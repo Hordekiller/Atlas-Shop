@@ -23,14 +23,11 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      const result = await api.post<{ token: string; user: any }>(
+      await api.post<{ token: string; user: any }>(
         "/auth/login",
         form,
       );
-      localStorage.setItem("web_token", result.token);
-      localStorage.setItem("web_user", JSON.stringify(result.user));
-      window.dispatchEvent(new Event("auth:change"));
-      router.push("/");
+      window.location.href = "/";
     } catch (err: any) {
       setError(err?.response?.message || err?.message || "خطا در ورود");
     } finally {
@@ -74,14 +71,11 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      const result = await api.post<{ token: string; user: any }>(
+      await api.post<{ token: string; user: any }>(
         "/auth/otp-login",
         { phone, code: otpCode },
       );
-      localStorage.setItem("web_token", result.token);
-      localStorage.setItem("web_user", JSON.stringify(result.user));
-      window.dispatchEvent(new Event("auth:change"));
-      router.push("/");
+      window.location.href = "/";
     } catch (err: any) {
       setError(err?.response?.message || err?.message || "خطا در ورود");
     } finally {
