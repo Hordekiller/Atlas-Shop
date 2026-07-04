@@ -11,7 +11,7 @@ export class CartService {
 
   private getVariant(
     variantMap: Map<number, unknown>,
-    variantId: number,
+    variantId: number | null,
   ):
     | {
         id: number;
@@ -21,7 +21,7 @@ export class CartService {
         images: unknown;
       }
     | undefined {
-    return variantId > 0
+    return variantId != null && variantId > 0
       ? (variantMap.get(variantId) as
           | {
               id: number;
@@ -61,7 +61,11 @@ export class CartService {
     });
 
     const variantIds = [
-      ...new Set(items.filter((i) => i.variantId > 0).map((i) => i.variantId)),
+      ...new Set(
+        items
+          .filter((i) => i.variantId != null && i.variantId > 0)
+          .map((i) => i.variantId as number),
+      ),
     ];
     const variants =
       variantIds.length > 0
@@ -283,7 +287,11 @@ export class CartService {
     });
 
     const variantIds = [
-      ...new Set(items.filter((i) => i.variantId > 0).map((i) => i.variantId)),
+      ...new Set(
+        items
+          .filter((i) => i.variantId != null && i.variantId > 0)
+          .map((i) => i.variantId as number),
+      ),
     ];
     const variants =
       variantIds.length > 0

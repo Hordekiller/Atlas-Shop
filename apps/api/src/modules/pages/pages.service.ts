@@ -213,7 +213,7 @@ export class PagesService {
     }
     return this.prisma.page.update({
       where: { id: pageId },
-      data: { contentJson: JSON.parse(revision.contentJson) },
+      data: { contentJson: revision.contentJson as object },
     });
   }
 
