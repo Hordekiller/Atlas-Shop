@@ -2,99 +2,63 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main]
 
 env:
-  NODE_VERSION: 22
-  DATABASE_URL: "postgresql://atlas:atlas123@localhost:5432/atlas_shop_test?schema=public"
-  JWT_SECRET: "ci-secret-key"
-  JWT_EXPIRES_IN: "7d"
-  PORT: 8000
-  CORS_ORIGIN: "http://localhost:3000,http://localhost:3001"
-  ENCRYPTION_KEY: "ci-encryption-key-do-not-use-in-production"
+  DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db?schema=public"
+  JWT_SECRET: "test-jwt-secret-for-ci"
+  ENCRYPTION_KEY: "test-encryption-key-that-is-32-chars!!"
 
 jobs:
   lint:
     name: Lint & TypeCheck
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: atlas
-          POSTGRES_PASSWORD: atlas123
-          POSTGRES_DB: atlas_shop_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 22
           cache: npm
-
       - run: npm ci
-
-      - name: Generate Prisma client
-        working-directory: apps/api
-        run: npx prisma generate
-
-      - name: Lint API
-        working-directory: apps/api
-        run: npm run lint
+      - run: npm run lint
 
   build:
     name: Build All Apps
     runs-on: ubuntu-latest
-    needs: lint
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 22
           cache: npm
-
       - run: npm ci
+      - run: npm run db:generate
+      - run: npm run build
 
-      - name: Generate Prisma client
-        working-directory: apps/api
-        run: npx prisma generate
-
-      - name: Build API
-        working-directory: apps/api
-        run: npm run build
-
-      - name: Build Admin
-        working-directory: apps/admin
-        run: npm run build
-
-      - name: Build Web
-        working-directory: apps/web
-        run: npm run build
+  test:
+    name: API Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate -w @atlas-shop/api
+      - run: npm test -w @atlas-shop/api
 
   smoke-test:
     name: API Smoke Test
     runs-on: ubuntu-latest
-    needs: build
-
     services:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: atlas
-          POSTGRES_PASSWORD: atlas123
-          POSTGRES_DB: atlas_shop_test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
         ports:
           - 5432:5432
         options: >-
@@ -102,128 +66,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 22
           cache: npm
-
       - run: npm ci
-
-      - name: Generate Prisma client
+      - run: npm run db:generate -w @atlas-shop/api
+      - run: npx prisma migrate deploy
         working-directory: apps/api
-        run: npx prisma generate
-
-      - name: Push schema & seed
-        working-directory: apps/api
-        run: |
-          npx prisma db push --accept-data-loss
-          echo "Schema pushed to PostgreSQL"
-
-      - name: Build
-        working-directory: apps/api
-        run: npm run build
-
-      - name: Run smoke tests
-        working-directory: apps/api
-        run: |
-          set +e
-          FAILED=0
-
-          # Start server
-          node dist/main.js &
-          SERVER_PID=$!
-          sleep 10
-
-          echo "=== Health check ==="
-          HTTP=$(curl -s -o /tmp/resp.txt -w "%{http_code}" http://localhost:8000/api/docs)
-          echo "HTTP $HTTP"
-          [ "$HTTP" = "200" ] || { cat /tmp/resp.txt; FAILED=1; }
-
-          api() { curl -s -o /tmp/resp.txt -w "%{http_code}" "$@"; }
-
-          echo "=== Register ==="
-          HTTP=$(api -X POST http://localhost:8000/api/v1/auth/register -H "Content-Type: application/json" -d '{"name":"مدیر آزمون","email":"ci@test.com","password":"test123"}')
-          if [ "$HTTP" = "200" ] || [ "$HTTP" = "201" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"user\"][\"name\"]}')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Login ==="
-          HTTP=$(api -X POST http://localhost:8000/api/v1/auth/login -H "Content-Type: application/json" -d '{"email":"ci@test.com","password":"test123"}')
-          TOKEN=""; if [ "$HTTP" = "200" ] || [ "$HTTP" = "201" ]; then TOKEN=$(python3 -c "import json; print(json.load(open('/tmp/resp.txt'))['token'])" 2>/dev/null); echo "Token obtained"; else echo "FAIL:"; cat /tmp/resp.txt; FAILED=1; fi
-
-          echo "=== Profile ==="
-          HTTP=$(api http://localhost:8000/api/v1/auth/me -H "Authorization: Bearer $TOKEN")
-          if [ "$HTTP" = "200" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"name\"]} / {d[\"email\"]}')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Categories ==="
-          HTTP=$(api http://localhost:8000/api/v1/categories)
-          if [ "$HTTP" = "200" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {len(d)} categories')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Create category ==="
-          HTTP=$(api -X POST http://localhost:8000/api/v1/categories -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"name":"الکترونیک","slug":"electronics"}')
-          if [ "$HTTP" = "200" ] || [ "$HTTP" = "201" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"name\"]} ({d[\"id\"]})')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Create product ==="
-          HTTP=$(api -X POST http://localhost:8000/api/v1/products -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"title":"هدفون بلوتوث","slug":"bluetooth-headphone","price":2500000,"stock":50,"categoryId":1}')
-          if [ "$HTTP" = "200" ] || [ "$HTTP" = "201" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"title\"]} ({d[\"id\"]})')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== List products ==="
-          HTTP=$(api "http://localhost:8000/api/v1/products?sort=newest")
-          if [ "$HTTP" = "200" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"total\"]} products')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Shipping methods ==="
-          HTTP=$(api http://localhost:8000/api/v1/shipping/methods)
-          if [ "$HTTP" = "200" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {len(d)} methods')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Create order ==="
-          HTTP=$(api -X POST http://localhost:8000/api/v1/orders -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"items":[{"productId":1,"quantity":2}],"shippingMethod":"post_pishtaz","agreedToTerms":true}')
-          if [ "$HTTP" = "200" ] || [ "$HTTP" = "201" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"orderNumber\"]} / {d[\"total\"]}')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Create coupon ==="
-          HTTP=$(api -X POST http://localhost:8000/api/v1/coupons -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"code":"SUMMER20","type":"percent","value":20,"maxUses":50}')
-          if [ "$HTTP" = "200" ] || [ "$HTTP" = "201" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"code\"]} - %{d[\"value\"]}')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Validate coupon ==="
-          HTTP=$(api "http://localhost:8000/api/v1/coupons/validate?code=SUMMER20&subtotal=5000000")
-          if [ "$HTTP" = "200" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: valid={d[\"valid\"]}, discount={d[\"discount\"]}')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Payment gateways ==="
-          HTTP=$(api http://localhost:8000/api/v1/payments/gateways)
-          if [ "$HTTP" = "200" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {len(d)} gateways')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Admin stats ==="
-          HTTP=$(api http://localhost:8000/api/v1/admin/stats -H "Authorization: Bearer $TOKEN")
-          if [ "$HTTP" = "200" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"totalUsers\"]} users, {d[\"totalProducts\"]} products, {d[\"totalOrders\"]} orders')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo "=== Update profile ==="
-          HTTP=$(api -X PUT http://localhost:8000/api/v1/auth/profile -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"name":"مدیر بروزشده","phone":"09120000000"}')
-          if [ "$HTTP" = "200" ] || [ "$HTTP" = "201" ]; then RESP=$(python3 -c "import json; d=json.load(open('/tmp/resp.txt')); print(f'OK: {d[\"name\"]} / {d[\"phone\"]}')" 2>&1); else RESP="FAIL"; fi
-          echo "$RESP"; [ "$RESP" = "FAIL" ] && { echo "Body:"; cat /tmp/resp.txt; FAILED=1; }
-
-          echo ""
-          if [ "$FAILED" = "1" ]; then
-            echo "========================================"
-            echo "  SOME SMOKE TESTS FAILED!"
-            echo "========================================"
-            kill $SERVER_PID 2>/dev/null
-            exit 1
-          fi
-          echo "========================================"
-          echo "  ALL SMOKE TESTS PASSED SUCCESSFULLY"
-          echo "========================================"
-
-          kill $SERVER_PID 2>/dev/null
+      - run: npm run test:e2e -w @atlas-shop/api
