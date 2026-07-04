@@ -30,6 +30,7 @@ const safeLocalStorage = {
 
 class ApiClient {
   private token?: string;
+  private maxRetries = 3;
 
   constructor() {
     this.token = safeLocalStorage.getItem("atlas_token") || undefined;
@@ -48,6 +49,7 @@ class ApiClient {
   private async request<T>(
     path: string,
     options: RequestInit = {},
+    attempt = 1,
   ): Promise<T> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -64,6 +66,14 @@ class ApiClient {
     });
 
     if (!response.ok) {
+      if (response.status === 429 && attempt <= this.maxRetries) {
+        const retryAfter = response.headers.get("Retry-After");
+        const delay = retryAfter
+          ? parseInt(retryAfter, 10) * 1000
+          : Math.min(1000 * Math.pow(2, attempt), 8000);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return this.request<T>(path, options, attempt + 1);
+      }
       const error = await response
         .json()
         .catch(() => ({ message: "Unknown error" }));

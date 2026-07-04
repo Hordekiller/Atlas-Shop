@@ -8,6 +8,7 @@ import {
   Req,
   Res,
 } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { Response } from "express";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
@@ -24,6 +25,7 @@ import { ChangePasswordDto } from "./dto/change-password.dto";
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post("register")
   @ApiOperation({ summary: "Register a new user" })
   async register(
@@ -55,6 +57,7 @@ export class AuthController {
     return result;
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post("login")
   @ApiOperation({ summary: "Login with email and password" })
   async login(
@@ -66,6 +69,7 @@ export class AuthController {
     return result;
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post("otp-login")
   @ApiOperation({ summary: "Login with phone and OTP code" })
   async otpLogin(

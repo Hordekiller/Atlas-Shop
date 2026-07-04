@@ -24,6 +24,9 @@ async function bootstrap() {
     defaultVersion: "1",
   });
 
+  // Trust proxy for correct IP detection behind Nginx (required for Throttler)
+  app.set("trust proxy", 1);
+
   app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
   app.use((req: any, _res, next) => {
