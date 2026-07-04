@@ -65,7 +65,7 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/sanitize-html": "^2.16.1",
     "@types/supertest": "^7.2.0",
-    "eslint": "^9.0.0",
+    "eslint": "^10.6.0",
     "jest": "^30.4.2",
     "prisma": "^5.22.0",
     "supertest": "^7.2.2",
