@@ -33,14 +33,15 @@ jobs:
       - name: Determine packages to publish
         id: packages
         run: |
+          SCOPE="@atlas-shop"
           if [ "${{ github.event.inputs.package }}" = "all" ] || [ "${{ github.event_name }}" = "release" ]; then
-            echo "names=@atlas-shop/shared-types @atlas-shop/api-client @atlas-shop/eslint-config" >> $GITHUB_OUTPUT
+            echo "names=$SCOPE/shared-types $SCOPE/api-client $SCOPE/eslint-config" >> $GITHUB_OUTPUT
           else
-            echo "names=@atlas-shop/${{ github.event.inputs.package }}" >> $GITHUB_OUTPUT
+            echo "names=$SCOPE/${{ github.event.inputs.package }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Build packages
-        run: npm run build -w @atlas-shop/shared-types -w @atlas-shop/api-client 2>/dev/null || true
+        run: npm run build -w packages/shared-types -w packages/api-client 2>/dev/null || true
 
       - name: Publish packages
         run: |

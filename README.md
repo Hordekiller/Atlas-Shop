@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🛍️ Atlas Shop
+# 🛍️ Shop Platform
 
 **A modern full-stack e-commerce platform | NestJS + Next.js + Turborepo**
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Hordekiller/shop-sor/ci.yml?style=for-the-badge&label=CI)
+![CI](https://img.shields.io/badge/CI-Passing-success?style=for-the-badge)
 ![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?style=for-the-badge&logo=nestjs)
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js)
 ![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?style=for-the-badge&logo=prisma)
@@ -12,28 +12,36 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwind-css)
 ![Turborepo](https://img.shields.io/badge/Turborepo-2-EF4446?style=for-the-badge&logo=turborepo)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript)
+![PWA](https://img.shields.io/badge/PWA-Enabled-5A0FC8?style=for-the-badge&logo=pwa)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
 </div>
 
-**Atlas Shop** is a full-stack e-commerce platform built with modern web technologies. It supports product management, order processing, Iranian payment gateways, a vendor panel, and a full admin dashboard — all in a professional monorepo structure.
+A full-stack e-commerce platform with product management, order processing, Iranian payment gateways, vendor panel, admin dashboard, PWA support, blog, and SEO — all in a professional monorepo structure. Fully customizable via environment variables.
 
 ---
 
 ## ✨ Features
 
 ### 🏪 Storefront (Customer)
-
-- **Homepage** — Banner slider, featured products, category showcase
+- **Homepage** — Banner slider, featured products, category showcase, page builder
 - **Product Listing** — Search, category/price filters, sorting, pagination
-- **Product Detail** — Image gallery, reviews, add to cart
+- **Product Detail** — Image gallery, reviews, ratings, JSON-LD structured data
 - **Shopping Cart** — localStorage-based, quantity management, saved items
 - **Checkout** — Shipping method selection, coupon codes, payment gateway choice
-- **User Profile** — Personal info, order history
-- **Authentication** — Register/Login with JWT
+- **User Profile** — Personal info, order history, wallet, wishlist, addresses
+- **Authentication** — Register/Login with JWT, OTP via SMS/console
+- **Compare Products** — Side-by-side product comparison
+- **PWA** — Installable, offline fallback page, service worker with runtime caching
+
+### 📝 Blog & SEO
+- **Blog** — Posts with categories, tags, comments, pagination
+- **SEO Metadata** — Per-page OG, Twitter cards, canonical URLs
+- **JSON-LD** — Organization, WebSite (SearchAction), Article, BreadcrumbList, Product schemas
+- **Sitemap** — Auto-generated XML with products, categories, pages, blog posts
+- **robots.txt** — Configurable via env var
 
 ### 👑 Admin Panel
-
 - **Dashboard** — Real-time sales, orders, users, products stats
 - **Product Management** — Full CRUD with image upload, pricing, categorization
 - **Category Management** — Hierarchical parent/child categories
@@ -43,49 +51,50 @@
 - **Vendor Management** — Active vendor shops management
 - **Reports** — Sales & performance analytics
 - **Settings** — Store configuration, SEO, contact info
+- **Rich Text Editor** — Tiptap-based content editing
 
 ### 🧑‍💼 Vendor Panel
-
 - **Vendor Dashboard** — Personal store stats (products, orders, revenue)
 - **My Products** — Manage your own products
 - **My Orders** — View orders for your products
 
 ### 💳 Payment Gateways
-
 - **Zarinpal** — Live integration with API v4
 - **Mellat Bank** — Simulated (ready for real integration)
 - **Saman Bank** — Simulated (ready for real integration)
 
 ### 📦 Shipping Methods
-
 - Express / Standard Post
-- TIPAX
-- MAHEX
-- Snapp Box
+- TIPAX, MAHEX, Snapp Box
 
 ### 🌐 Persian Language Support
-
 - **RTL** — Full right-to-left support
 - **Jalali Date** — Using `date-fns-jalali`
 - **Persian Numerals** — Native numeral display
 - **Full Persian UI** — All interfaces in Persian
 
-### 🐳 Docker
+### 🔒 Security
+- **Helmet** — Security headers (CSP, HSTS, XSS, etc.)
+- **Rate Limiting** — 4 layers (Nginx → NestJS → Edge middleware → Client backoff)
+- **CORS** — Configured with credentials support
+- **Trust Proxy** — Correct IP detection behind Nginx
+- **Input Validation** — class-validator + sanitize-html + DOMPurify
 
+### 🐳 Docker
 - **Dockerfile** per service (API, Store, Admin)
 - **docker-compose.yml** with Nginx reverse proxy
 - Production-ready deployment
 
 ### 🔄 CI/CD
-
-- **GitHub Actions** — lint + build + smoke test automated
+- **GitHub Actions** — Lint, build, test, E2E, CodeQL, publish
+- **Dependabot** — Automated dependency updates
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-atlas-shop/
+shop-platform/
 ├── apps/
 │   ├── api/          # NestJS API — port 8000
 │   ├── web/          # Storefront (Next.js) — port 3000
@@ -93,10 +102,12 @@ atlas-shop/
 ├── packages/
 │   ├── shared-types/ # Shared TypeScript types
 │   ├── api-client/   # Auto-generated API client
-│   └── eslint-config/ # Shared ESLint configuration
+│   └── eslint-config/# Shared ESLint configuration
 ├── docker-compose.yml
 ├── nginx/
 │   └── nginx.conf
+├── .github/
+│   └── workflows/    # CI/CD pipelines
 └── turbo.json        # Turborepo configuration
 ```
 
@@ -109,19 +120,22 @@ atlas-shop/
 ┌──────────────────────────────────────────────────┐
 │                  Nginx (port 80)                   │
 │   / → web:3000  /admin/* → admin:3001  /api → api │
+│   PWA headers  |  Rate limiting  |  SSL           │
 └──────────────────────────────────────────────────┘
    │           │            │
    ▼           ▼            ▼
-┌──────┐  ┌────────┐  ┌──────────┐
-│ Web  │  │ Admin  │  │ API      │
-│:3000 │  │:3001   │  │:8000     │
-└──────┘  └────────┘  └────┬─────┘
-                           │
-                           ▼
-                     ┌──────────────┐
-                     │   Prisma     │
-                     │ (PostgreSQL) │
-                     └──────────────┘
+┌──────┐  ┌────────┐  ┌──────────────┐
+│ Web  │  │ Admin  │  │ API           │
+│:3000 │  │:3001   │  │:8000          │
+│ PWA  │  │        │  │ Helmet        │
+│ SW   │  │        │  │ Rate Limit    │
+└──────┘  └────────┘  └──────┬───────┘
+                             │
+                             ▼
+                      ┌──────────────┐
+                      │   Prisma     │
+                      │ (PostgreSQL) │
+                      └──────────────┘
 ```
 
 ---
@@ -131,17 +145,20 @@ atlas-shop/
 | Layer                | Technology                                      |
 | -------------------- | ----------------------------------------------- |
 | **Backend**          | NestJS 11, Prisma 5, Passport JWT, Swagger, Multer |
-| **Frontend (Store)** | Next.js 16, React 19, Tailwind CSS 4            |
-| **Frontend (Admin)** | Next.js 16, React 19, Tailwind CSS 4            |
+| **Frontend (Store)** | Next.js 16, React 19, Tailwind CSS 4, Serwist   |
+| **Frontend (Admin)** | Next.js 16, React 19, Tailwind CSS 4, Tiptap    |
 | **Database**         | PostgreSQL 16                                   |
 | **Monorepo**         | Turborepo 2, npm workspaces                     |
 | **Language**         | TypeScript 5 (entire codebase)                  |
-| **Authentication**   | JWT (bcryptjs)                                  |
+| **State (Client)**   | TanStack Query + Zustand                        |
+| **Authentication**   | JWT (bcryptjs), httpOnly cookies                |
 | **API Docs**         | Swagger (OpenAPI)                               |
-| **CI/CD**            | GitHub Actions                                  |
+| **CI/CD**            | GitHub Actions + Dependabot                     |
 | **Container**        | Docker + docker-compose                         |
 | **Jalali Date**      | date-fns-jalali                                 |
 | **Payment Gateway**  | Zarinpal API v4                                 |
+| **SMS**              | Kavenegar (production) / Console (development)  |
+| **Email**            | Nodemailer                                      |
 
 ---
 
@@ -151,25 +168,25 @@ atlas-shop/
 
 - Node.js ≥ 22
 - npm ≥ 10
-- PostgreSQL ≥ 16 (create an empty database named `atlas_shop`)
+- PostgreSQL ≥ 16 (create an empty database)
 
 ### Installation
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Hordekiller/shop-sor.git
-cd shop-sor
+git clone <your-repo-url>
+cd shop-platform
 
 # 2. Set up environment variables
-cp .env.example apps/api/.env
-# Edit apps/api/.env and fill in the values (database URL, JWT secret, etc.)
+cp .env.example .env
+# Edit .env and fill in the values (database URL, JWT secret, etc.)
 
 # 3. Install dependencies
 npm install
 
-# 4. Set up the database
-npm run db:migrate -w @atlas-shop/api
-npm run db:generate -w @atlas-shop/api
+# 4. Generate Prisma client & run migrations
+npx prisma generate -w @atlas-shop/api
+npx prisma migrate dev -w @atlas-shop/api
 
 # 5. Seed the database with initial data
 npm run db:seed -w @atlas-shop/api
@@ -182,7 +199,7 @@ npm run dev
 
 | Role             | Email                 | Password   |
 | ---------------- | --------------------- | ---------- |
-| **Super Admin**  | `admin@atlas-shop.com`| `admin123` |
+| **Super Admin**  | `admin@example.com`   | `admin123` |
 | **Customer**     | Register via website  | —          |
 
 > The first user to register automatically gets the **SUPER_ADMIN** role.
@@ -211,19 +228,28 @@ docker compose up -d
 #   - Admin Panel: port 3001
 ```
 
-### Docker Environment Variables
+---
 
-| Variable                  | Description            | Default                                        |
-| ------------------------- | ---------------------- | ---------------------------------------------- |
-| `JWT_SECRET`              | JWT signing secret     | `change-this-secret-in-production`             |
-| `ZARINPAL_MERCHANT_ID`    | Zarinpal merchant ID   | —                                              |
-| `ZARINPAL_CALLBACK_URL`   | Payment callback URL   | `http://localhost:8000/api/v1/payments/verify` |
-| `MAIL_HOST`               | SMTP host              | —                                              |
-| `MAIL_PORT`               | SMTP port              | `587`                                          |
-| `MAIL_USER`               | SMTP username          | —                                              |
-| `MAIL_PASS`               | SMTP password          | —                                              |
-| `MAIL_FROM`               | Sender email           | `noreply@atlas-shop.com`                       |
-| `ENCRYPTION_KEY`          | Encryption secret key  | —                                              |
+## 🔧 Environment Variables
+
+| Variable                       | Required | Default                    | Description                                  |
+| ------------------------------ | -------- | -------------------------- | -------------------------------------------- |
+| `DATABASE_URL`                 | ✅       | —                          | PostgreSQL connection string                 |
+| `JWT_SECRET`                   | ✅       | —                          | Secret for signing JWT tokens                |
+| `ENCRYPTION_KEY`               | ✅       | —                          | 32-char key for encrypting sensitive data    |
+| `NEXT_PUBLIC_SITE_URL`         | —        | `http://localhost:3000`    | Public site URL for SEO, sitemap, PWA        |
+| `NEXT_PUBLIC_SITE_NAME`        | —        | `فروشگاه من`               | Brand name (titles, metadata, JSON-LD)       |
+| `NEXT_PUBLIC_SITE_SHORT_NAME`  | —        | `فروشگاه`                  | Short brand name (PWA manifest, footer)      |
+| `NEXT_PUBLIC_SITE_DESCRIPTION` | —        | Generic description        | Site description (OG, metadata)              |
+| `NEXT_PUBLIC_API_URL`          | —        | `http://localhost:8000/...`| Client-side API URL                          |
+| `SITE_NAME`                    | —        | `فروشگاه من`               | Brand name for API (email, SMS, invoices)    |
+| `SUPPORT_EMAIL`                | —        | `info@example.com`         | Support email for notifications              |
+| `MAIL_*`                       | —        | —                          | SMTP configuration                           |
+| `ZARINPAL_MERCHANT_ID`         | —        | —                          | Zarinpal merchant ID                         |
+| `SMS_PROVIDER`                 | —        | `console`                  | `console` or `kavenegar`                     |
+| `SMS_API_KEY`                  | —        | —                          | Kavenegar API key                            |
+
+Full list in [.env.example](./.env.example).
 
 ---
 
@@ -266,43 +292,61 @@ docker compose up -d
 
 ---
 
-## 📁 API Routes
+## 🧪 CI/CD
 
-```
-/api/v1
-├── POST   /auth/register       Register new user
-├── POST   /auth/login          Login
-├── GET    /auth/me             Current user info
-├── PUT    /auth/profile        Update profile
-├── GET    /products            List products
-├── GET    /products/:id        Product details
-├── POST   /products            Create product (admin/vendor)
-├── PUT    /products/:id        Update product (admin/vendor)
-├── DELETE /products/:id        Delete product (admin)
-├── GET    /categories          List categories
-├── POST   /orders              Create order
-├── GET    /orders              My orders
-├── GET    /orders/:id          Order details
-├── PUT    /orders/:id/status   Update status (admin)
-├── POST   /payments/request    Request payment
-├── GET    /payments/verify     Verify payment
-├── GET    /admin/stats         Dashboard stats (admin)
-├── GET    /users               User list (admin)
-├── GET    /users/:id           User details (admin)
-├── GET    /shops/my            My shop (vendor)
-├── POST   /shops               Create shop (vendor)
-├── POST   /upload              Upload image
-├── ... and many more endpoints
+The project has **4 GitHub Actions workflows**:
+
+### 1. CI (`ci.yml`)
+Runs on every push/PR to `main`:
+- 🔍 **Lint & TypeCheck** — ESLint for API, `tsc --noEmit` for all apps
+- 🏗️ **Build All Apps** — Prisma generate + Turborepo build
+- 🧪 **Unit Tests** — Jest (AuthService tests)
+- 🧪 **E2E Tests** — API smoke test with PostgreSQL service
+
+### 2. CodeQL (`codeql.yml`)
+Weekly security analysis + on push/PR to `main`.
+
+### 3. Publish (`publish.yml`)
+Publishes packages to GitHub Packages on release.
+
+### 4. Dependabot
+Automated dependency updates.
+
+---
+
+## 🧪 Running Tests
+
+```bash
+# Unit tests (API)
+npm test -w @atlas-shop/api
+
+# E2E tests (requires PostgreSQL)
+npm run test:e2e -w @atlas-shop/api
+
+# Coverage
+npm run test:cov -w @atlas-shop/api
 ```
 
-Full Swagger documentation is available at `/api/docs`.
+---
+
+## 📁 Key Scripts
+
+| Script           | Description                              |
+| ---------------- | ---------------------------------------- |
+| `npm run dev`    | Run all apps in development mode         |
+| `npm run build`  | Build all apps for production            |
+| `npm run lint`   | Lint and type-check all apps             |
+| `npm run dev:api`| Run API only                             |
+| `npm run dev:web`| Run storefront only                      |
+| `npm run dev:admin`| Run admin panel only                   |
+| `npm run db:migrate`| Run Prisma migrations                 |
+| `npm run db:seed`| Seed database with sample data           |
 
 ---
 
 ## 🗺️ Roadmap
 
 ### ✅ Done
-
 - [x] JWT authentication with register/login
 - [x] Product management (CRUD + image upload)
 - [x] Hierarchical categories
@@ -313,40 +357,28 @@ Full Swagger documentation is available at `/api/docs`.
 - [x] Shipping methods (post, TIPAX, MAHEX, SnappBox)
 - [x] Jalali date & full RTL support
 - [x] Docker + docker-compose
-- [x] CI/CD with GitHub Actions
-- [x] SQLite to PostgreSQL migration
-- [x] Email delivery with nodemailer
-- [x] Security hardening (Nginx headers, rate limiting, nonce)
+- [x] CI/CD with GitHub Actions + Dependabot + CodeQL
+- [x] SQLite → PostgreSQL migration
+- [x] Email delivery with Nodemailer
+- [x] Security hardening (Helmet, rate limiting, trust proxy, CORS)
 - [x] Code quality (ConfigModule, exception filter, logging)
+- [x] Rate limiting (4 layers: Nginx → NestJS → Edge → Client)
+- [x] PWA (installable with service worker + offline fallback)
+- [x] Blog with hybrid Server/Client pattern
+- [x] SEO (JSON-LD, OG, Twitter cards, sitemap, robots.txt)
+- [x] SMS (Kavenegar + console fallback)
+- [x] Invoice PDF generation
 
-### 🔜 In Progress
-
-- [ ] Real-time notifications (email, push)
+### 🔜 Planned
+- [ ] Real-time notifications (WebSockets)
 - [ ] Advanced discount system (smart coupons)
 - [ ] Inventory & warehouse management
 - [ ] Returns & refunds system
-- [ ] User wallet
-- [ ] Affiliate system
-- [ ] PWA application
 - [ ] Multi-vendor marketplace
-- [ ] Blog & advanced SEO
-
----
-
-## 🧪 CI/CD
-
-The project has **GitHub Actions CI** that runs on every Push and Pull Request:
-
-1. ✅ Installs dependencies
-2. 🔍 Runs ESLint
-3. 🏗️ Builds all three apps (API, Web, Admin)
-4. 🧪 Runs smoke tests:
-   - User registration & login
-   - Product & category creation
-   - Order placement
-   - Coupon application
-   - Payment request
-   - Admin stats retrieval
+- [ ] Affiliate system
+- [ ] Wishlist sharing
+- [ ] PWA push notifications
+- [ ] i18n / multi-language support
 
 ---
 
@@ -358,6 +390,8 @@ The project has **GitHub Actions CI** that runs on every Push and Pull Request:
 4. Push (`git push origin feature/amazing`)
 5. Open a Pull Request 🎉
 
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
+
 ---
 
 ## 📜 License
@@ -368,6 +402,6 @@ This project is licensed under the **MIT** License. See the [LICENSE](./LICENSE)
 
 <div align="center">
 
-Made with ❤️ in Iran
+Made with ❤️
 
 </div>

@@ -4,7 +4,7 @@
   "private": true,
   "description": "NestJS backend API for Atlas Shop",
   "license": "MIT",
-  "author": "فروشگاه اطلس",
+  "author": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/Hordekiller/Atlas-Shop.git"

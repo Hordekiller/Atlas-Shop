@@ -8,13 +8,15 @@ import { NotificationTemplatesService } from "../notification-templates/notifica
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter | null = null;
-  private fromEmail = "noreply@atlas-shop.com";
+  private fromEmail: string;
 
   constructor(
     private prisma: PrismaService,
     @Optional() private queueService?: NotificationQueueService,
     @Optional() private templatesService?: NotificationTemplatesService,
-  ) {}
+  ) {
+    this.fromEmail = process.env.MAIL_FROM || "noreply@example.com";
+  }
 
   private async ensureTransporter() {
     if (this.transporter) return;
@@ -36,7 +38,7 @@ export class EmailService {
       this.fromEmail =
         process.env.MAIL_FROM ||
         settings?.contactEmail ||
-        "noreply@atlas-shop.com";
+        "noreply@example.com";
 
       this.transporter = nodemailer.createTransport({
         host,
@@ -88,13 +90,13 @@ export class EmailService {
     // Fallback
     await this.send(
       email,
-      `تأیید سفارش ${orderNumber} — اطلس شاپ`,
+      `تأیید سفارش ${orderNumber} — ${process.env.SITE_NAME || "فروشگاه من"}`,
       `<div style="font-family:Tahoma,sans-serif;max-width:600px;margin:auto;padding:24px;">
 <h2 style="color:#ef4056;">سفارش شما ثبت شد ✅</h2>
 <p>سلام ${userName}،</p>
 <p>سفارش شما با شماره <strong>${orderNumber}</strong> با موفقیت ثبت شد.</p>
 <hr style="margin:24px 0;border:none;border-top:1px solid #e0e0e6;" />
-<p style="color:#81858b;font-size:12px;">اطلس شاپ — فروشگاه اینترنتی</p>
+<p style="color:#81858b;font-size:12px;">${process.env.SITE_NAME || "فروشگاه من"} — فروشگاه اینترنتی</p>
 </div>`,
     );
   }
@@ -133,13 +135,13 @@ export class EmailService {
     // Fallback
     await this.send(
       email,
-      `بروزرسانی وضعیت سفارش ${orderNumber} — اطلس شاپ`,
+      `بروزرسانی وضعیت سفارش ${orderNumber} — ${process.env.SITE_NAME || "فروشگاه من"}`,
       `<div style="font-family:Tahoma,sans-serif;max-width:600px;margin:auto;padding:24px;">
 <h2 style="color:#ef4056;">بروزرسانی وضعیت سفارش 🔔</h2>
 <p>سلام ${userName}،</p>
 <p>وضعیت سفارش <strong>${orderNumber}</strong> به <strong>${label}</strong> تغییر کرد.</p>
 <hr style="margin:24px 0;border:none;border-top:1px solid #e0e0e6;" />
-<p style="color:#81858b;font-size:12px;">اطلس شاپ — فروشگاه اینترنتی</p>
+<p style="color:#81858b;font-size:12px;">${process.env.SITE_NAME || "فروشگاه من"} — فروشگاه اینترنتی</p>
 </div>`,
     );
   }

@@ -46,11 +46,10 @@ export default function LoginPage() {
             <Icon icon="tabler:shopping-bag" className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-3">
-            به اطلس شاپ خوش آمدید
+            به پنل مدیریت خوش آمدید
           </h1>
           <p className="text-white/80 text-sm max-w-md mx-auto leading-relaxed">
-            پنل مدیریت فروشگاه اطلس شاپ — مدیریت محصولات، سفارشات، کاربران و
-            فروشندگان
+            پنل مدیریت — مدیریت محصولات، سفارشات، کاربران و فروشندگان
           </p>
         </div>
         {/* Decorative circles */}
@@ -81,7 +80,7 @@ export default function LoginPage() {
                 className="text-xl font-bold"
                 style={{ color: "var(--v-text)" }}
               >
-                اطلس شاپ
+                {process.env.NEXT_PUBLIC_SITE_SHORT_NAME || "پنل مدیریت"}
               </span>
             </div>
             <h2
@@ -127,7 +126,7 @@ export default function LoginPage() {
                   className="v-input"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@atlas-shop.com"
+                  placeholder="admin@example.com"
                   dir="ltr"
                 />
               </div>
@@ -184,7 +183,7 @@ export default function LoginPage() {
             className="text-center text-xs mt-4"
             style={{ color: "var(--v-text-disabled)" }}
           >
-            فروشگاه اطلس شاپ &copy; {new Date().getFullYear()}
+            {process.env.NEXT_PUBLIC_SITE_NAME || "فروشگاه"} &copy; {new Date().getFullYear()}
           </p>
         </div>
       </div>

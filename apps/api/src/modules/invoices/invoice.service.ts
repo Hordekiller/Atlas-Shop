@@ -100,7 +100,7 @@ export class InvoiceService {
       const fontBold = hasFont ? "Vazir-Bold" : "Helvetica";
 
       // Header
-      doc.fontSize(24).font(fontBold).text("اطلس شاپ", { align: "right" });
+      doc.fontSize(24).font(fontBold).text(process.env.SITE_NAME || "فروشگاه من", { align: "right" });
       doc.fontSize(14).font(font).text("صورتحساب", { align: "right" });
       doc.moveDown(0.5);
 

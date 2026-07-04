@@ -91,7 +91,7 @@ export default function LoginPage() {
           <div className="text-center mb-6">
             <h1 className="text-xl font-bold">ورود</h1>
             <p className="text-sm text-[var(--dk-text-light)] mt-1">
-              به اطلس شاپ خوش آمدید
+              خوش آمدید
             </p>
           </div>
 

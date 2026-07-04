@@ -4,7 +4,7 @@
   "private": true,
   "description": "Next.js admin panel for Atlas Shop",
   "license": "MIT",
-  "author": "فروشگاه اطلس",
+  "author": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/Hordekiller/Atlas-Shop.git"
@@ -13,7 +13,7 @@
     "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "echo 'noop'"
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.2.0",

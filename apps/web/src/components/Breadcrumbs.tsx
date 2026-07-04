@@ -17,7 +17,7 @@ export default function Breadcrumbs({ items }: { items: Crumb[] }) {
       name: item.label,
       ...(item.href
         ? {
-            item: `${process.env.NEXT_PUBLIC_SITE_URL || "https://atlas-shop.com"}${item.href}`,
+            item: `${process.env.NEXT_PUBLIC_SITE_URL || ""}${item.href}`,
           }
         : {}),
     })),

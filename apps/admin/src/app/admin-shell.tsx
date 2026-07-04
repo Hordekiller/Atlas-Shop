@@ -228,7 +228,7 @@ export default function AdminShell({
               className="font-bold text-base whitespace-nowrap transition-opacity duration-300"
               style={{ color: "var(--v-text)", opacity: sidebarOpen ? 1 : 0 }}
             >
-              اطلس شاپ
+              {process.env.NEXT_PUBLIC_SITE_SHORT_NAME || "پنل مدیریت"}
             </span>
           </div>
           <button

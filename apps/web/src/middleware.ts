@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith("/auth/")) {
     const ip =
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.ip ||
+      request.headers.get("x-real-ip") ||
       "anonymous";
     const allowed = rateLimit(`auth:${ip}`, 10, 60_000);
     if (!allowed) {

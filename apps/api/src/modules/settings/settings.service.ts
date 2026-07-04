@@ -4,9 +4,9 @@ import { PrismaService } from "../../common/prisma.service";
 @Injectable()
 export class SettingsService {
   private readonly defaults: Record<string, string> = {
-    site_name: "اطلس شاپ",
-    site_description: "فروشگاه اینترنتی اطلس شاپ",
-    support_email: "info@atlas-shop.com",
+    site_name: process.env.SITE_NAME || "فروشگاه من",
+    site_description: `فروشگاه اینترنتی ${process.env.SITE_NAME || "فروشگاه من"}`,
+    support_email: process.env.SUPPORT_EMAIL || "info@example.com",
     support_phone: "۰۲۱-۱۲۳۴۵۶۷۸",
     default_shipping: "post_pishtaz",
     currency: "تومان",

@@ -1,9 +1,9 @@
 import { Metadata } from "next";
 import ProductDetailPage from "./page-client";
+import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://atlas-shop.com";
 
 async function getProduct(slug: string) {
   try {
@@ -42,11 +42,11 @@ export async function generateMetadata({
     }
   })();
 
-  const title = `${product.title} | فروشگاه اطلس`;
+  const title = `${product.title} | ${SITE_NAME}`;
   const description =
     product.metaDesc ||
     product.description?.slice(0, 160) ||
-    `خرید ${product.title} با بهترین قیمت در فروشگاه اطلس`;
+    `خرید ${product.title} با بهترین قیمت در ${SITE_NAME}`;
 
   return {
     title,
@@ -83,7 +83,7 @@ export default async function ProductPage({
                 ? JSON.parse(product.images)
                 : product.images || [];
             return imgs.length > 0
-              ? imgs.map((i: string) => `${SITE_URL}${i}`)
+              ? imgs.map((i: string) => /^https?:\/\//.test(i) ? i : `${SITE_URL}${i}`)
               : undefined;
           } catch {
             return undefined;

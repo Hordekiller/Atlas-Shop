@@ -74,9 +74,9 @@ export default function BlogPage() {
         {/* Hero */}
         <div className="bg-gradient-to-l from-[var(--dk-primary)] to-[var(--dk-primary-dark)] py-12 text-white">
           <div className="dk-container">
-            <h1 className="text-3xl font-bold mb-2">وبلاگ اطلس شاپ</h1>
+            <h1 className="text-3xl font-bold mb-2">وبلاگ</h1>
             <p className="text-white/80">
-              آخرین مقالات، راهنماها و اخبار فروشگاه
+              آخرین مقالات، راهنماها و اخبار
             </p>
           </div>
         </div>

@@ -4,7 +4,7 @@
   "private": true,
   "description": "پلتفرم فروشگاهی مدرن و کامل با NestJS، Next.js و Turborepo",
   "license": "MIT",
-  "author": "فروشگاه اطلس",
+  "author": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/Hordekiller/Atlas-Shop.git"

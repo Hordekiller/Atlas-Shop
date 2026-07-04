@@ -1,13 +1,13 @@
 import { Metadata } from "next";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "درباره ما",
-  description:
-    "درباره فروشگاه اینترنتی اطلس شاپ | خرید آنلاین با بهترین قیمت‌ها",
-  alternates: { canonical: "https://atlas-shop.com/about" },
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: `${SITE_URL}/about` },
   openGraph: {
-    title: "درباره ما | فروشگاه اطلس",
-    description: "درباره فروشگاه اینترنتی اطلس شاپ",
+    title: `درباره ما | ${SITE_NAME}`,
+    description: SITE_DESCRIPTION,
   },
 };
 

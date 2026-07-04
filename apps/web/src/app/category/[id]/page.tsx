@@ -1,9 +1,9 @@
 import { Metadata } from "next";
 import CategoryPageClient from "./page-client";
+import { SITE_URL, SITE_NAME } from "@/lib/site-config";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://atlas-shop.com";
 
 async function getCategory(id: string) {
   try {
@@ -33,13 +33,13 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${category.name} | فروشگاه اطلس`,
+    title: `${category.name} | ${SITE_NAME}`,
     description:
       category.description ||
-      `خرید محصولات دسته ${category.name} در فروشگاه اطلس`,
+      `خرید محصولات دسته ${category.name} در ${SITE_NAME}`,
     alternates: { canonical: `${SITE_URL}/category/${category.slug || id}` },
     openGraph: {
-      title: `${category.name} | فروشگاه اطلس`,
+      title: `${category.name} | ${SITE_NAME}`,
       description: category.description || `خرید محصولات دسته ${category.name}`,
     },
   };

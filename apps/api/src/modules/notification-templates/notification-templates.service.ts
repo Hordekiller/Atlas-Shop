@@ -7,7 +7,11 @@ import { PrismaService } from "../../common/prisma.service";
 
 @Injectable()
 export class NotificationTemplatesService {
-  constructor(private prisma: PrismaService) {}
+  private readonly siteName: string;
+
+  constructor(private prisma: PrismaService) {
+    this.siteName = process.env.SITE_NAME || "فروشگاه من";
+  }
 
   async findAll() {
     return this.prisma.notificationTemplate.findMany({
@@ -93,7 +97,7 @@ export class NotificationTemplatesService {
     return {
       subject: tpl.emailSubject
         ? this.render(tpl.emailSubject, vars)
-        : "اطلس شاپ",
+        : this.siteName,
       html: this.render(tpl.emailHtml, vars),
     };
   }
@@ -109,7 +113,7 @@ export class NotificationTemplatesService {
         titleTemplate: "سفارش {orderNumber} ثبت شد ✅",
         messageTemplate:
           "سفارش شما با مبلغ {amount} تومان ثبت و در انتظار پرداخت است.",
-        emailSubject: "تأیید سفارش {orderNumber} — اطلس شاپ",
+        emailSubject: "تأیید سفارش {orderNumber} — {siteName}",
         emailHtml: `<div style="font-family:Tahoma,sans-serif;max-width:600px;margin:auto;padding:24px;">
 <h2 style="color:#ef4056;">سفارش شما ثبت شد ✅</h2>
 <p>سلام {userName}،</p>
@@ -117,7 +121,7 @@ export class NotificationTemplatesService {
 <p>مبلغ کل: <strong>{amount} تومان</strong></p>
 <p>به محض تغییر وضعیت سفارش، از طریق اطلاع‌رسانی به شما خبر می‌دهیم.</p>
 <hr style="margin:24px 0;border:none;border-top:1px solid #e0e0e6;" />
-<p style="color:#81858b;font-size:12px;">اطلس شاپ — فروشگاه اینترنتی</p>
+<p style="color:#81858b;font-size:12px;">{siteName} — فروشگاه اینترنتی</p>
 </div>`,
         channels: "in_app,email",
       },
@@ -126,14 +130,14 @@ export class NotificationTemplatesService {
         titleTemplate: "پرداخت سفارش {orderNumber} تأیید شد ✅",
         messageTemplate:
           "پرداخت سفارش {orderNumber} به مبلغ {amount} تومان با موفقیت انجام شد.",
-        emailSubject: "پرداخت سفارش {orderNumber} تأیید شد — اطلس شاپ",
+        emailSubject: "پرداخت سفارش {orderNumber} تأیید شد — {siteName}",
         emailHtml: `<div style="font-family:Tahoma,sans-serif;max-width:600px;margin:auto;padding:24px;">
 <h2 style="color:#ef4056;">پرداخت تأیید شد ✅</h2>
 <p>سلام {userName}،</p>
 <p>پرداخت سفارش <strong>{orderNumber}</strong> به مبلغ <strong>{amount} تومان</strong> با موفقیت انجام شد.</p>
 <p>سفارش شما در اسرع وقت پردازش خواهد شد.</p>
 <hr style="margin:24px 0;border:none;border-top:1px solid #e0e0e6;" />
-<p style="color:#81858b;font-size:12px;">اطلس شاپ — فروشگاه اینترنتی</p>
+<p style="color:#81858b;font-size:12px;">{siteName} — فروشگاه اینترنتی</p>
 </div>`,
         channels: "in_app,email",
       },
@@ -142,13 +146,13 @@ export class NotificationTemplatesService {
         titleTemplate: "وضعیت سفارش {orderNumber} به‌روز شد 🔔",
         messageTemplate:
           "وضعیت سفارش {orderNumber} به {statusLabel} تغییر کرد.",
-        emailSubject: "بروزرسانی وضعیت سفارش {orderNumber} — اطلس شاپ",
+        emailSubject: "بروزرسانی وضعیت سفارش {orderNumber} — {siteName}",
         emailHtml: `<div style="font-family:Tahoma,sans-serif;max-width:600px;margin:auto;padding:24px;">
 <h2 style="color:#ef4056;">بروزرسانی وضعیت سفارش 🔔</h2>
 <p>سلام {userName}،</p>
 <p>وضعیت سفارش <strong>{orderNumber}</strong> به <strong>{statusLabel}</strong> تغییر کرد.</p>
 <hr style="margin:24px 0;border:none;border-top:1px solid #e0e0e6;" />
-<p style="color:#81858b;font-size:12px;">اطلس شاپ — فروشگاه اینترنتی</p>
+<p style="color:#81858b;font-size:12px;">{siteName} — فروشگاه اینترنتی</p>
 </div>`,
         channels: "in_app,email",
       },

@@ -684,7 +684,7 @@ model ProductAttribute {
 
 model ShopSettings {
   id               String @id @default("singleton")
-  shopName         String @default("فروشگاه اطلس")
+  shopName         String @default("فروشگاه")
   shopLogo         String?
   shopFavicon      String?
   shopDescription  String?

@@ -213,7 +213,7 @@ export default function ContactPage() {
         <div className="dk-container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="font-bold text-sm mb-3">اطلس شاپ</h4>
+              <h4 className="font-bold text-sm mb-3">{process.env.NEXT_PUBLIC_SITE_SHORT_NAME || "فروشگاه"}</h4>
               <ul className="space-y-2 text-xs text-[var(--dk-text-light)]">
                 <li>
                   <a href="/about" className="hover:text-[var(--dk-primary)]">
@@ -289,11 +289,11 @@ export default function ContactPage() {
           </div>
           <div className="border-t border-[var(--dk-border)] pt-6 text-center text-xs text-[var(--dk-text-light)]">
             <p>
-              استفاده از مطالب فروشگاه اینترنتی اطلس شاپ فقط برای مقاصد غیرتجاری
+              استفاده از مطالب فروشگاه فقط برای مقاصد غیرتجاری
               و با ذکر منبع بلامانع است.
             </p>
             <p className="mt-2">
-              کلیه حقوق این سایت متعلق به اطلس شاپ می‌باشد.
+              کلیه حقوق این سایت متعلق به {process.env.NEXT_PUBLIC_SITE_NAME || "فروشگاه"} می‌باشد.
             </p>
           </div>
         </div>

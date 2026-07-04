@@ -107,12 +107,12 @@ interface FormData {
 }
 
 const defaults: FormData = {
-  shopName: "فروشگاه اطلس",
+  shopName: "فروشگاه",
   shopLogo: "",
   shopFavicon: "",
   shopDescription: "",
-  siteName: "اطلس شاپ",
-  siteDescription: "فروشگاه اینترنتی اطلس شاپ",
+  siteName: "فروشگاه",
+  siteDescription: "فروشگاه اینترنتی",
   currency: "تومان",
   timezone: "Asia/Tehran",
   contactPhone: "",

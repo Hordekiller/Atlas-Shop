@@ -56,7 +56,7 @@ export class NotificationQueueService implements OnModuleDestroy {
           const port = parseInt(process.env.MAIL_PORT || "587", 10);
           const user = process.env.MAIL_USER || "";
           const pass = process.env.MAIL_PASS || "";
-          const from = process.env.MAIL_FROM || "noreply@atlas-shop.com";
+          const from = process.env.MAIL_FROM || "noreply@example.com";
 
           if (!host || host === "localhost") {
             this.logger.warn(

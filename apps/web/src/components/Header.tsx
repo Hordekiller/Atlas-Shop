@@ -74,9 +74,8 @@ export default function Header() {
               className="text-2xl font-bold"
               style={{ color: "var(--dk-primary)" }}
             >
-              اطلس
+              {process.env.NEXT_PUBLIC_SITE_SHORT_NAME?.split(" ")[0] || "فروشگاه"}
             </span>
-            <span className="text-lg font-bold text-gray-700">شاپ</span>
           </Link>
 
           {/* Search */}

@@ -24,7 +24,7 @@ interface FooterConfig {
 }
 
 const defaultFooter: FooterConfig = {
-  aboutTitle: "اطلس شاپ",
+  aboutTitle: process.env.NEXT_PUBLIC_SITE_SHORT_NAME || "فروشگاه",
   aboutLinks: [
     { label: "درباره ما", href: "/about" },
     { label: "تماس با ما", href: "/contact" },
@@ -44,10 +44,9 @@ const defaultFooter: FooterConfig = {
   ],
   socialTitle: "با ما همراه شوید",
   copyright:
-    "استفاده از مطالب فروشگاه اینترنتی اطلس شاپ فقط برای مقاصد غیرتجاری و با ذکر منبع بلامانع است.",
-  shopName: "فروشگاه اطلس",
-  shopDescription:
-    "فروشگاه اینترنتی اطلس شاپ، مرجع تخصصی خرید آنلاین با بهترین قیمت‌ها و ضمانت اصالت کالا.",
+    "استفاده از مطالب فروشگاه فقط برای مقاصد غیرتجاری و با ذکر منبع بلامانع است.",
+  shopName: process.env.NEXT_PUBLIC_SITE_NAME || "فروشگاه",
+  shopDescription: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || "",
 };
 
 const socialIcons = [faMobile, faComment, faTv, faX];

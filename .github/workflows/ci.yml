@@ -10,6 +10,12 @@ env:
   DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db?schema=public"
   JWT_SECRET: "test-jwt-secret-for-ci"
   ENCRYPTION_KEY: "test-encryption-key-that-is-32-chars!!"
+  NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
+  NEXT_PUBLIC_API_URL: "http://localhost:8000/api/v1"
+  NEXT_PUBLIC_MEDIA_URL: "http://localhost:8000"
+  NEXT_PUBLIC_SITE_NAME: "فروشگاه"
+  NEXT_PUBLIC_SITE_SHORT_NAME: "فروشگاه"
+  NEXT_PUBLIC_SITE_DESCRIPTION: "CI test build"
 
 jobs:
   lint:
@@ -34,11 +40,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run db:generate
+      - run: npx prisma generate
+        working-directory: apps/api
       - run: npm run build
 
   test:
-    name: API Tests
+    name: Unit Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,11 +54,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run db:generate -w @atlas-shop/api
+      - run: npx prisma generate
+        working-directory: apps/api
       - run: npm test -w @atlas-shop/api
 
-  smoke-test:
-    name: API Smoke Test
+  e2e-test:
+    name: API E2E Test
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -73,7 +81,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run db:generate -w @atlas-shop/api
+      - run: npx prisma generate
+        working-directory: apps/api
       - run: npx prisma migrate deploy
         working-directory: apps/api
       - run: npm run test:e2e -w @atlas-shop/api

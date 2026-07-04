@@ -154,7 +154,7 @@ export default function AdminDashboard() {
           className="text-sm mt-1"
           style={{ color: "var(--v-text-secondary)" }}
         >
-          خلاصه فعالیت‌های فروشگاه اطلس شاپ
+          خلاصه فعالیت‌ها
         </p>
       </div>
 
