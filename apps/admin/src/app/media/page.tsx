@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Icon } from "@iconify/react";
-import { api } from "@/lib/api";
+import { api, API_URL } from "@/lib/api";
 import { mediaUrl } from "@/lib/media";
 
 interface MediaItem {
@@ -108,7 +108,7 @@ export default function MediaPage() {
       formData.append("file", file);
       const token = localStorage.getItem("atlas_token");
       const res = await fetch(
-        `http://localhost:8000/api/v1/upload?sourceType=admin`,
+        `${API_URL}/upload?sourceType=admin`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },

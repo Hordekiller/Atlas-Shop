@@ -3,7 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
-import { api } from "@/lib/api";
+import { api, API_URL } from "@/lib/api";
 import TagInput from "@/components/TagInput";
 import TiptapEditor from "@/components/TiptapEditor";
 
@@ -97,7 +97,7 @@ export default function NewProductPage() {
     const fd = new FormData();
     for (const f of e.target.files) fd.append("files", f);
     try {
-      const result = await fetch(`http://localhost:3001/api/products/upload`, {
+      const result = await fetch(`${API_URL}/products/upload`, {
         method: "POST",
         body: fd,
       }).then((r) => r.json());

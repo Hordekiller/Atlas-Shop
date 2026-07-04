@@ -13,6 +13,11 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { clearAuthCookie, setAuthCookie } from "../../common/auth-cookie";
+import { RegisterDto } from "./dto/register.dto";
+import { LoginDto } from "./dto/login.dto";
+import { OtpLoginDto } from "./dto/otp-login.dto";
+import { UpdateProfileDto } from "./dto/update-profile.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -23,19 +28,7 @@ export class AuthController {
   @ApiOperation({ summary: "Register a new user" })
   async register(
     @Res({ passthrough: true }) response: Response,
-    @Body()
-    body: {
-      name: string;
-      email: string;
-      phone?: string;
-      password: string;
-      addressTitle?: string;
-      receiverName?: string;
-      province?: string;
-      city?: string;
-      postalCode?: string;
-      addressText?: string;
-    },
+    @Body() dto: RegisterDto,
   ) {
     const {
       addressTitle,
@@ -45,12 +38,12 @@ export class AuthController {
       postalCode,
       addressText,
       ...rest
-    } = body;
+    } = dto;
     const address = receiverName
       ? {
           title: addressTitle,
           receiverName,
-          phone: body.phone || "",
+          phone: dto.phone || "",
           province: province || "",
           city: city || "",
           postalCode: postalCode || "",
@@ -66,9 +59,9 @@ export class AuthController {
   @ApiOperation({ summary: "Login with email and password" })
   async login(
     @Res({ passthrough: true }) response: Response,
-    @Body() body: { email: string; password: string },
+    @Body() dto: LoginDto,
   ) {
-    const result = await this.authService.login(body.email, body.password);
+    const result = await this.authService.login(dto.email, dto.password);
     setAuthCookie(response, result.token);
     return result;
   }
@@ -77,9 +70,9 @@ export class AuthController {
   @ApiOperation({ summary: "Login with phone and OTP code" })
   async otpLogin(
     @Res({ passthrough: true }) response: Response,
-    @Body() body: { phone: string; code: string },
+    @Body() dto: OtpLoginDto,
   ) {
-    const result = await this.authService.otpLogin(body.phone, body.code);
+    const result = await this.authService.otpLogin(dto.phone, dto.code);
     setAuthCookie(response, result.token);
     return result;
   }
@@ -105,16 +98,9 @@ export class AuthController {
   @ApiOperation({ summary: "Update current user profile" })
   async updateProfile(
     @Req() req: any,
-    @Body()
-    body: {
-      name?: string;
-      phone?: string;
-      nationalId?: string;
-      birthDate?: string;
-      avatar?: string;
-    },
+    @Body() dto: UpdateProfileDto,
   ) {
-    return this.authService.updateProfile(req.user.id, body);
+    return this.authService.updateProfile(req.user.id, dto);
   }
 
   @Put("change-password")
@@ -123,12 +109,12 @@ export class AuthController {
   @ApiOperation({ summary: "Change current user password" })
   async changePassword(
     @Req() req: any,
-    @Body() body: { currentPassword: string; newPassword: string },
+    @Body() dto: ChangePasswordDto,
   ) {
     return this.authService.changePassword(
       req.user.id,
-      body.currentPassword,
-      body.newPassword,
+      dto.currentPassword,
+      dto.newPassword,
     );
   }
 }

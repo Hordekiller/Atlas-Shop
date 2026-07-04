@@ -116,7 +116,7 @@ export class WalletService {
         data: {
           walletId: wallet.id,
           amount: -amount,
-          type: "WITHDRAWAL",
+          type: "WITHDRAW",
           description: description ?? "Withdrawal",
           balanceAfter: updated.balance,
         },

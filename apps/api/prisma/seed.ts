@@ -1,10 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminPassword = await bcrypt.hash("admin123", 12);
+  const rawAdminPassword =
+    process.env.ADMIN_SEED_PASSWORD || crypto.randomBytes(16).toString("hex");
+  const adminPassword = await bcrypt.hash(rawAdminPassword, 12);
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@atlas-shop.com" },
@@ -306,7 +309,8 @@ async function main() {
   }
 
   console.log("Seed completed:");
-  console.log(`  Admin: ${admin.email} / admin123`);
+  console.log(`  Admin: ${admin.email} / ${rawAdminPassword}`);
+  console.log(`  (Set ADMIN_SEED_PASSWORD env var to use a fixed password)`);
   console.log(
     `  Categories: ${electronics.name}, ${mobile.name}, ${laptop.name}, ${fashion.name}, ${clothing.name}`,
   );

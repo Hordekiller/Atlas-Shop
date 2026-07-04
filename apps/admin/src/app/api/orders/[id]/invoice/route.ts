@@ -8,12 +8,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const token =
-    req.headers.get("authorization") || req.nextUrl.searchParams.get("token");
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const authHeader = req.headers.get("authorization");
+  if (authHeader) headers["Authorization"] = authHeader;
 
   try {
     const res = await fetch(`${API_URL}/orders/${id}/invoice`, { headers });

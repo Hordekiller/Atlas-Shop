@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
-import { api } from "@/lib/api";
+import { api, API_URL } from "@/lib/api";
 
 interface UserProfile {
   id: number;
@@ -155,7 +155,7 @@ export default function PanelProfile() {
                   fd.append("file", file);
                   const token = localStorage.getItem("web_token");
                   const res = await fetch(
-                    "http://localhost:8000/api/v1/upload?sourceType=admin",
+                    `${API_URL}/upload?sourceType=admin`,
                     {
                       method: "POST",
                       headers: { Authorization: `Bearer ${token}` },

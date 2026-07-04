@@ -3,18 +3,20 @@ import { API_URL } from "./media";
 export { API_URL };
 
 async function getToken(): Promise<string | null> {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("web_token");
+  return null;
+}
+
+export async function setToken(_token: string | null): Promise<void> {
+  // No-op: token is managed via httpOnly cookie
 }
 
 export const api = {
   get: async <T>(path: string, options?: RequestInit): Promise<T> => {
-    const token = await getToken();
     const res = await fetch(`${API_URL}${path}`, {
+      credentials: "include",
       ...options,
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options?.headers,
       },
     });
@@ -32,12 +34,11 @@ export const api = {
     body?: unknown,
     options?: RequestInit,
   ): Promise<T> => {
-    const token = await getToken();
     const res = await fetch(`${API_URL}${path}`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options?.headers,
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -55,12 +56,11 @@ export const api = {
     body?: unknown,
     options?: RequestInit,
   ): Promise<T> => {
-    const token = await getToken();
     const res = await fetch(`${API_URL}${path}`, {
       method: "PUT",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options?.headers,
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -74,12 +74,11 @@ export const api = {
   },
 
   delete: async <T>(path: string, options?: RequestInit): Promise<T> => {
-    const token = await getToken();
     const res = await fetch(`${API_URL}${path}`, {
       method: "DELETE",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options?.headers,
       },
       ...options,

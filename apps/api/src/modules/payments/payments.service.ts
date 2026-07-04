@@ -2,14 +2,19 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
   ServiceUnavailableException,
+  Logger,
 } from "@nestjs/common";
+import crypto from "node:crypto";
 import { PrismaService } from "../../common/prisma.service";
 import { EncryptionService } from "../settings/encryption.service";
 const ZARINPAL_API = "https://api.zarinpal.com/pg/v4";
 
 @Injectable()
 export class PaymentsService {
+  private readonly logger = new Logger(PaymentsService.name);
+
   constructor(
     private prisma: PrismaService,
     private encryption: EncryptionService,
@@ -47,12 +52,14 @@ export class PaymentsService {
       };
     }
 
+    const nonce = crypto.randomUUID();
+
     let authority: string;
     let paymentUrl: string;
 
     switch (normalizedGateway) {
       case "zarinpal":
-        const result = await this.requestZarinpalPayment(order.total.toNumber(), order.id);
+        const result = await this.requestZarinpalPayment(order.total.toNumber(), order.id, nonce);
         authority = result.authority;
         paymentUrl = result.url;
         break;
@@ -65,6 +72,7 @@ export class PaymentsService {
         orderId,
         amount: order.total,
         authority,
+        nonce,
         gateway: normalizedGateway,
         status: "PENDING",
       },
@@ -79,9 +87,11 @@ export class PaymentsService {
     };
   }
 
-  async verifyPayment(authority: string, status?: string) {
+  async verifyPayment(authority: string, nonce?: string, status?: string) {
+    if (!nonce) throw new ForbiddenException("Missing nonce");
+
     const payment = await this.prisma.payment.findFirst({
-      where: { authority },
+      where: { authority, nonce },
       include: { order: true },
     });
 
@@ -104,7 +114,7 @@ export class PaymentsService {
     if (verified) {
       await this.prisma.payment.update({
         where: { id: payment.id },
-        data: { status: "PAID", referenceId: refId, paidAt: new Date() },
+        data: { status: "PAID", referenceId: refId, paidAt: new Date(), verifiedAt: new Date() },
       });
 
       await this.prisma.order.update({
@@ -147,7 +157,7 @@ export class PaymentsService {
     }
   }
 
-  private async requestZarinpalPayment(amount: number, orderId: number) {
+  private async requestZarinpalPayment(amount: number, orderId: number, nonce: string) {
     const merchantId = await this.getZarinpalMerchantId();
     if (!merchantId) {
       throw new ServiceUnavailableException("Zarinpal merchant is not configured");
@@ -155,7 +165,7 @@ export class PaymentsService {
 
     const callbackUrl =
       process.env.ZARINPAL_CALLBACK_URL ||
-      `http://localhost:8000/api/v1/payments/verify`;
+      `http://localhost:8000/api/v1/payments/verify?nonce=${nonce}`;
 
     const response = await fetch(`${ZARINPAL_API}/payment/request.json`, {
       method: "POST",
@@ -168,7 +178,10 @@ export class PaymentsService {
       }),
     });
 
-    const data = await response.json().catch(() => ({}));
+    const data = await response.json().catch((err) => {
+      this.logger.warn("Zarinpal request payment JSON parse failed", err.message);
+      return {};
+    });
 
     if (data.data && data.data.authority) {
       return {
@@ -198,7 +211,10 @@ export class PaymentsService {
       }),
     });
 
-    const data = await response.json().catch(() => ({}));
+    const data = await response.json().catch((err) => {
+      this.logger.warn("Zarinpal verify payment JSON parse failed", err.message);
+      return {};
+    });
 
     if (data.data && data.data.ref_id) {
       return { verified: true, refId: String(data.data.ref_id) };

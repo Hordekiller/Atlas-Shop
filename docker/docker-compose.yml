@@ -6,8 +6,10 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://atlas:atlas@db:5432/atlas_shop
-      - JWT_SECRET=production-secret-change-me
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-atlas}:${POSTGRES_PASSWORD:-atlas}@db:5432/${POSTGRES_DB:-atlas_shop}
+      - JWT_SECRET=${JWT_SECRET}
+    env_file:
+      - ../.env
     depends_on:
       db:
         condition: service_healthy
@@ -39,15 +41,15 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_USER=atlas
-      - POSTGRES_PASSWORD=atlas
-      - POSTGRES_DB=atlas_shop
+      - POSTGRES_USER=${POSTGRES_USER:-atlas}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-atlas}
+      - POSTGRES_DB=${POSTGRES_DB:-atlas_shop}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U atlas"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-atlas}"]
       interval: 5s
       timeout: 5s
       retries: 5

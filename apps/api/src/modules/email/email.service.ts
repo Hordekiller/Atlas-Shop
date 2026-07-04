@@ -18,39 +18,42 @@ export class EmailService {
 
   private async ensureTransporter() {
     if (this.transporter) return;
+    const host = process.env.MAIL_HOST || "";
+    const port = parseInt(process.env.MAIL_PORT || "587", 10);
+    const user = process.env.MAIL_USER || "";
+    const pass = process.env.MAIL_PASS || "";
+
+    if (!host || host === "localhost") {
+      throw new Error(
+        "Mail transport not configured — set MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS env vars",
+      );
+    }
+
     try {
       const settings = await this.prisma.shopSettings.findUnique({
         where: { id: "singleton" },
       });
-      const host = process.env.SMTP_HOST || "localhost";
-      const port = parseInt(process.env.SMTP_PORT || "587", 10);
-      const user = process.env.SMTP_USER || "";
-      const pass = process.env.SMTP_PASS || "";
-      this.fromEmail = settings?.contactEmail || "noreply@atlas-shop.com";
+      this.fromEmail =
+        process.env.MAIL_FROM ||
+        settings?.contactEmail ||
+        "noreply@atlas-shop.com";
 
-      if (host && host !== "localhost") {
-        this.transporter = nodemailer.createTransport({
-          host,
-          port,
-          secure: port === 465,
-          auth: user ? { user, pass } : undefined,
-        });
-      } else {
-        this.logger.warn("SMTP not configured — emails will not be sent");
-      }
+      this.transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: user ? { user, pass } : undefined,
+      });
     } catch (e) {
       this.logger.error("Failed to setup email transport", e);
+      throw e;
     }
   }
 
   async send(to: string, subject: string, html: string) {
     await this.ensureTransporter();
-    if (!this.transporter) {
-      this.logger.log(`[EMAIL MOCK] To: ${to}, Subject: ${subject}`);
-      return;
-    }
     try {
-      await this.transporter.sendMail({
+      await this.transporter!.sendMail({
         from: this.fromEmail,
         to,
         subject,

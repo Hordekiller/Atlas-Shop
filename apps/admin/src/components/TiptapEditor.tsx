@@ -16,6 +16,7 @@ import {
 } from "@tiptap/extension-table";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
+import { API_URL } from "@/lib/api";
 import { Icon } from "@iconify/react";
 
 const lowlight = createLowlight(common);
@@ -101,7 +102,7 @@ export default function TiptapEditor({
       try {
         const token = localStorage.getItem("atlas_token");
         const res = await fetch(
-          `http://localhost:8000/api/v1/upload?sourceType=admin`,
+          `${API_URL}/upload?sourceType=admin`,
           {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },

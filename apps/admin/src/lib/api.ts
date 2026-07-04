@@ -1,15 +1,12 @@
-const API_URL =
+export const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("atlas_token") : null;
-
   const res = await fetch(`${API_URL}${path}`, {
+    credentials: "include",
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options?.headers,
     },
   });

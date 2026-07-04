@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
+import * as nodemailer from "nodemailer";
 import { PrismaService } from "../../common/prisma.service";
 
 interface QueueItem {
@@ -51,31 +52,32 @@ export class NotificationQueueService implements OnModuleDestroy {
       try {
         if (item.type === "email") {
           const { to, subject, html } = item.payload;
-          const nodemailer = require("nodemailer");
-          const host = process.env.SMTP_HOST || "localhost";
-          const port = parseInt(process.env.SMTP_PORT || "587", 10);
-          const user = process.env.SMTP_USER || "";
-          const pass = process.env.SMTP_PASS || "";
+          const host = process.env.MAIL_HOST || "";
+          const port = parseInt(process.env.MAIL_PORT || "587", 10);
+          const user = process.env.MAIL_USER || "";
+          const pass = process.env.MAIL_PASS || "";
+          const from = process.env.MAIL_FROM || "noreply@atlas-shop.com";
 
-          if (host && host !== "localhost" && user) {
-            const transporter = nodemailer.createTransport({
-              host,
-              port,
-              secure: port === 465,
-              auth: { user, pass },
-            });
-            await transporter.sendMail({
-              from: process.env.SMTP_FROM || "noreply@atlas-shop.com",
-              to,
-              subject,
-              html,
-            });
-            this.logger.log(`[Queue] Email sent to ${to}: ${subject}`);
-          } else {
-            this.logger.log(
-              `[Queue][EMAIL MOCK] To: ${to}, Subject: ${subject}`,
+          if (!host || host === "localhost") {
+            this.logger.warn(
+              `[Queue] Cannot send email — MAIL_HOST not configured`,
             );
+            return;
           }
+
+          const transporter = nodemailer.createTransport({
+            host,
+            port,
+            secure: port === 465,
+            auth: user ? { user, pass } : undefined,
+          });
+          await transporter.sendMail({
+            from,
+            to,
+            subject,
+            html,
+          });
+          this.logger.log(`[Queue] Email sent to ${to}: ${subject}`);
         } else if (item.type === "sms") {
           this.logger.log(
             `[Queue][SMS MOCK] Payload: ${JSON.stringify(item.payload)}`,

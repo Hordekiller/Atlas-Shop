@@ -1,27 +1,48 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
+const safeLocalStorage = {
+  getItem(key: string): string | null {
+    if (typeof window === "undefined") return null;
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  setItem(key: string, value: string): void {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // quota exceeded or storage unavailable
+    }
+  },
+  removeItem(key: string): void {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // storage unavailable
+    }
+  },
+};
+
 class ApiClient {
   private token?: string;
 
   constructor() {
-    if (typeof window !== "undefined") {
-      this.token = localStorage.getItem("atlas_token") || undefined;
-    }
+    this.token = safeLocalStorage.getItem("atlas_token") || undefined;
   }
 
   setToken(token: string) {
     this.token = token;
-    if (typeof window !== "undefined") {
-      localStorage.setItem("atlas_token", token);
-    }
+    safeLocalStorage.setItem("atlas_token", token);
   }
 
   clearToken() {
     this.token = undefined;
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("atlas_token");
-    }
+    safeLocalStorage.removeItem("atlas_token");
   }
 
   private async request<T>(

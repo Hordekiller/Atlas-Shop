@@ -3,6 +3,7 @@ import {
   BadRequestException,
   NotFoundException,
   ForbiddenException,
+  Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma.service";
 import { CouponsService } from "../coupons/coupons.service";
@@ -13,6 +14,8 @@ import { ShippingService } from "../shipping/shipping.service";
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private prisma: PrismaService,
     private couponsService: CouponsService,
@@ -270,7 +273,7 @@ export class OrdersService {
       if (user.email) {
         this.emailService
           .sendOrderConfirmation(user.email, orderNumber, user.name, total)
-          .catch(() => {});
+          .catch((err) => this.logger.warn("Email send failed", err.message));
       }
     }
 
@@ -466,7 +469,7 @@ export class OrdersService {
             nextStatus,
             orderUser.name,
           )
-          .catch(() => {});
+          .catch((err) => this.logger.warn("Email send failed", err.message));
       }
     }
 

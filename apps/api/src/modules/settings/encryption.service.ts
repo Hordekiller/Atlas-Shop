@@ -11,7 +11,8 @@ export class EncryptionService {
     if (!secret) {
       throw new Error("ENCRYPTION_KEY is not configured");
     }
-    this.key = crypto.scryptSync(secret, "atlas-salt", 32);
+    const salt = crypto.randomBytes(32).toString("hex");
+    this.key = crypto.scryptSync(secret, salt, 32);
   }
 
   encrypt(text: string): string {
@@ -34,7 +35,7 @@ export class EncryptionService {
       decrypted += decipher.final("utf8");
       return decrypted;
     } catch {
-      return encryptedText;
+      throw new Error("Decryption failed");
     }
   }
 }

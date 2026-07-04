@@ -1,10 +1,14 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma.service";
+import { SmsService } from "../sms/sms.service";
 import * as crypto from "crypto";
 
 @Injectable()
 export class OtpService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private smsService: SmsService,
+  ) {}
 
   async request(phone: string): Promise<{ expiresIn: number }> {
     const existing = await this.prisma.otp.findFirst({
@@ -23,7 +27,7 @@ export class OtpService {
     await this.prisma.otp.deleteMany({ where: { phone, verified: false } });
     await this.prisma.otp.create({ data: { phone, code, expiresAt } });
 
-    console.log(`[OTP] Code for ${phone}: ${code}`);
+    await this.smsService.sendOtp(phone, code);
 
     return { expiresIn: 120 };
   }

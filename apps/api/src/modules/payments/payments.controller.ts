@@ -38,9 +38,11 @@ export class PaymentsController {
   async verify(
     @Query("Authority") authority: string,
     @Query("Status") status: string,
+    @Query("nonce") nonce: string,
   ) {
     return this.paymentsService.verifyPayment(
       authority,
+      nonce,
       status as "OK" | "NOK",
     );
   }

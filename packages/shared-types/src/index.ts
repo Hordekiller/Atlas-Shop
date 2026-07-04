@@ -17,8 +17,8 @@ export interface Product {
   title: string;
   slug: string;
   description?: string;
-  price: number;
-  salePrice?: number;
+  price: string;
+  salePrice?: string;
   sku?: string;
   stock: number;
   type: "simple" | "variable" | "digital" | "external";
@@ -58,10 +58,10 @@ export interface Shop {
 export interface Order {
   id: number;
   orderNumber: string;
-  subtotal: number;
-  shippingCost: number;
-  discount: number;
-  total: number;
+  subtotal: string;
+  shippingCost: string;
+  discount: string;
+  total: string;
   status: string;
   paymentStatus: string;
   userId: number;
@@ -72,8 +72,8 @@ export interface Order {
 export interface OrderItem {
   id: number;
   quantity: number;
-  price: number;
-  total: number;
+  price: string;
+  total: string;
   productId: number;
   product?: Product;
 }
@@ -93,8 +93,8 @@ export interface Coupon {
   id: number;
   code: string;
   type: "percent" | "fixed";
-  value: number;
-  minOrder: number;
+  value: string;
+  minOrder: string;
   maxUses?: number;
   usedCount: number;
   expiresAt?: string;

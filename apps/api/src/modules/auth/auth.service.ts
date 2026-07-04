@@ -13,6 +13,7 @@ import {
   validateMobile,
   validateNationalId,
   validatePersianName,
+  isValidIranLocation,
 } from "../../common/iran-validators";
 
 @Injectable()
@@ -50,6 +51,14 @@ export class AuthService {
     }
     if (data.nationalId && !validateNationalId(data.nationalId)) {
       throw new BadRequestException("کد ملی نامعتبر است");
+    }
+    if (
+      data.address &&
+      data.address.province &&
+      data.address.city &&
+      !isValidIranLocation(data.address.province, data.address.city)
+    ) {
+      throw new BadRequestException("استان یا شهر نامعتبر است");
     }
 
     const existing = await this.prisma.user.findFirst({

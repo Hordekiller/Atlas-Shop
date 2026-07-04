@@ -12,5 +12,13 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "main": "index.js"
+  "main": "index.js",
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint-plugin-import": "^2.31.0"
+  },
+  "peerDependencies": {
+    "eslint": "^8.0.0 || ^9.0.0"
+  }
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
-import { api } from "@/lib/api";
+import { api, API_URL } from "@/lib/api";
 
 interface FontRecord {
   id: number;
@@ -82,8 +82,8 @@ export default function FontsPage() {
         const fd = new FormData();
         fd.append("file", uploadFile);
         fd.append("sourceType", "admin");
-        const token = localStorage.getItem("web_token");
-        const uploadRes = await fetch("http://localhost:8000/api/v1/upload", {
+        const token = localStorage.getItem("atlas_token");
+        const uploadRes = await fetch(`${API_URL}/upload`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
           body: fd,

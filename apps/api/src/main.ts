@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe, VersioningType } from "@nestjs/common";
+import { HttpAdapterHost } from "@nestjs/core";
 import { CacheInterceptor } from "./common/cache.interceptor";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { NestExpressApplication } from "@nestjs/platform-express";
@@ -9,10 +10,12 @@ import helmet from "helmet";
 import { AppModule } from "./app.module";
 import { AUTH_COOKIE_NAME } from "./common/auth-cookie";
 import { PrismaService } from "./common/prisma.service";
+import { PrismaExceptionFilter } from "./common/prisma-exception.filter";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Product images must be public for storefront rendering
   app.useStaticAssets(join(process.cwd(), "uploads"), { prefix: "/uploads" });
 
   app.setGlobalPrefix("api");
@@ -47,6 +50,9 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new CacheInterceptor(app.get(PrismaService)));
 
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new PrismaExceptionFilter(httpAdapter));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -55,15 +61,17 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle("Atlas Shop API")
-    .setDescription("Full-stack e-commerce API")
-    .setVersion("1.0")
-    .addBearerAuth()
-    .build();
+  if (process.env.NODE_ENV !== "production") {
+    const config = new DocumentBuilder()
+      .setTitle("Atlas Shop API")
+      .setDescription("Full-stack e-commerce API")
+      .setVersion("1.0")
+      .addBearerAuth()
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api/docs", app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup("api/docs", app, document);
+  }
 
   await app.listen(process.env.PORT || 8000);
   console.log(`API running on http://localhost:${process.env.PORT || 8000}`);

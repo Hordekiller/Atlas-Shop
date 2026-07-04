@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Icon } from "@iconify/react";
-import { api } from "@/lib/api";
+import { api, API_URL } from "@/lib/api";
 import TiptapEditor from "@/components/TiptapEditor";
 
 interface BlogCategory {
@@ -79,7 +79,7 @@ export default function EditBlogPost() {
       fd.append("file", file);
       const token = localStorage.getItem("atlas_token");
       const res = await fetch(
-        `http://localhost:8000/api/v1/upload?sourceType=blog`,
+        `${API_URL}/upload?sourceType=blog`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },

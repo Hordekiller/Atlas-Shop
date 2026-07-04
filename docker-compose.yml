@@ -7,14 +7,18 @@ services:
       - "8000:8000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=file:./data/prod.db
-      - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-atlas}:${POSTGRES_PASSWORD:-atlas}@db:5432/${POSTGRES_DB:-atlas_shop}
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=7d
       - PORT=8000
       - CORS_ORIGIN=http://localhost:3000,http://localhost:3001
+    env_file:
+      - .env
     volumes:
-      - api_data:/app/apps/api/prisma/data
       - api_uploads:/app/apps/api/uploads
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: curl -f http://localhost:8000/api/docs || exit 1
@@ -50,6 +54,23 @@ services:
     depends_on:
       - api
 
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-atlas}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-atlas}
+      - POSTGRES_DB=${POSTGRES_DB:-atlas_shop}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-atlas}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   nginx:
     image: nginx:alpine
     ports:
@@ -63,5 +84,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  api_data:
   api_uploads:
+  pgdata:

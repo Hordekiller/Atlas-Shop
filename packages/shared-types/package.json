@@ -12,9 +12,14 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
+    "prepublish": "npm run build",
     "lint": "echo 'noop'"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
   }
 }

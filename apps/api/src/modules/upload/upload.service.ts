@@ -2,12 +2,15 @@ import {
   Injectable,
   BadRequestException,
   ForbiddenException,
+  Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma.service";
 import { join, extname } from "path";
 
 @Injectable()
 export class UploadService {
+  private readonly logger = new Logger(UploadService.name);
+
   private readonly ALLOWED_IMAGE_TYPES = [
     "image/jpeg",
     "image/png",
@@ -91,7 +94,9 @@ export class UploadService {
       if (metadata.width && metadata.height) {
         return { width: metadata.width, height: metadata.height };
       }
-    } catch {}
+    } catch (err) {
+      this.logger.warn("Failed to get image dimensions", (err as Error).message);
+    }
     return null;
   }
 
@@ -106,7 +111,9 @@ export class UploadService {
         const fs = await import("fs/promises");
         await fs.rename(filepath + "_resized", filepath);
       }
-    } catch {}
+    } catch (err) {
+      this.logger.warn("Failed to resize image", (err as Error).message);
+    }
   }
 
   async generateThumbnails(
@@ -138,7 +145,9 @@ export class UploadService {
           .toFile(thumbPath);
         result[`${name}Url`] = `${urlPrefix}${filename}-${name}.webp`;
       }
-    } catch {}
+    } catch (err) {
+      this.logger.warn("Failed to generate thumbnails", (err as Error).message);
+    }
     return result;
   }
 
@@ -298,7 +307,9 @@ export class UploadService {
           fs.unlinkSync(thumbPath);
         }
       }
-    } catch {}
+    } catch (err) {
+      this.logger.warn("Failed to delete media file from disk", (err as Error).message);
+    }
 
     await this.prisma.mediaFile.delete({ where: { id } });
   }

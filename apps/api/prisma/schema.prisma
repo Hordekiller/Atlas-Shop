@@ -13,6 +13,7 @@ enum UserRole {
   CUSTOMER
   ADMIN
   SUPER_ADMIN
+  VENDOR
 }
 
 enum ProductType {
@@ -84,7 +85,6 @@ enum StockMovementType {
 enum WalletTransactionType {
   DEPOSIT
   WITHDRAW
-  WITHDRAWAL
   REFUND
   BONUS
   PAYMENT
@@ -372,7 +372,7 @@ model OrderItem {
   orderId   Int
   productId Int
   variantId Int?
-  order     Order          @relation(fields: [orderId], references: [id])
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product        @relation(fields: [productId], references: [id])
   variant   ProductVariant? @relation(fields: [variantId], references: [id])
 }
@@ -401,6 +401,8 @@ model Payment {
   authority   String?
   referenceId String?
   status      PaymentStatus @default(PENDING)
+  nonce       String?  @unique
+  verifiedAt  DateTime? @db.Timestamptz
   gateway     String?
   paidAt      DateTime? @db.Timestamptz
   createdAt   DateTime @default(now()) @db.Timestamptz
@@ -425,13 +427,13 @@ model Review {
   createdAt  DateTime @default(now()) @db.Timestamptz
   updatedAt  DateTime @updatedAt @db.Timestamptz
 
-  userId    Int
+  userId    Int?
   productId Int
   orderId   Int?
 
-  user      User         @relation(fields: [userId], references: [id])
+  user      User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   product   Product      @relation(fields: [productId], references: [id])
-  order     Order?       @relation(fields: [orderId], references: [id])
+  order     Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
   media     ReviewMedia[]
   likesRel  ReviewLike[]
 
@@ -779,7 +781,7 @@ model PageRevision {
   id           Int      @id @default(autoincrement())
   pageId       Int
   title        String
-  contentJson  String
+  contentJson  Json
   authorId     Int?
   note         String?
   createdAt    DateTime @default(now()) @db.Timestamptz
@@ -1037,7 +1039,7 @@ model CartItem {
 
   userId    Int
   productId Int
-  variantId Int      @default(0)
+  variantId Int?
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
