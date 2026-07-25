@@ -20,7 +20,7 @@
     "@fortawesome/free-regular-svg-icons": "^7.2.0",
     "@fortawesome/free-solid-svg-icons": "^7.2.0",
     "@fortawesome/react-fontawesome": "^3.3.1",
-    "@serwist/next": "9.5.11",
+    "@serwist/next": "9.5.12",
     "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-query-devtools": "5.101.2",
     "@types/dompurify": "^3.0.5",
