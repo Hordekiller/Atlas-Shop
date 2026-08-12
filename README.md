@@ -174,7 +174,7 @@ shop-platform/
 
 ```bash
 # 1. Clone the repository
-git clone <your-repo-url>
+git clone <https://github.com/Hordekiller/Atlas-Shop>
 cd shop-platform
 
 # 2. Set up environment variables
